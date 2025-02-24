@@ -1,0 +1,87 @@
+:root {
+    --color-primary: rgb(92, 114, 133);
+    --color-secondary: rgb(129, 140, 120);
+    --color-accent: rgb(167, 180, 158);
+    --color-background: rgb(226, 224, 200);
+}
+
+body {
+    background-color: var(--color-background);
+}
+
+header {
+    background-color: var(--color-primary);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+}
+
+.nav-links li {
+    margin-left: 20px;
+    background-color: var(--color-secondary);
+    padding: 1em 2em;
+}
+
+.burger {
+    display: none;
+    cursor: pointer;
+}
+
+.burger-line {
+    width: 25px;
+    height: 3px;
+    background: var(--color-accent);
+    margin: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Add this to your styles.css */
+.nav-active {
+    display: flex !important;
+}
+
+.toggle .line1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.toggle .line2 {
+    opacity: 0;
+}
+
+.toggle .line3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 87%;
+        position: absolute;
+        top: 60px;
+        background: var(--color-secondary);
+    }
+
+    .nav-links li {
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .burger {
+        display: block;
+    }
+}
+
+nav a:hover {
+    color: var(--color-accent);
+}
