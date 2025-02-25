@@ -5,9 +5,10 @@
     --color-secondary: rgb(129, 140, 120);
     --color-accent: rgb(167, 180, 158);
     --color-background: rgb(226, 224, 200);
+    --rounded: 1em;
 }
 
-html\, body {
+html, body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -17,16 +18,24 @@ main {
     flex: 1;
 }
 
+main::after {
+    content: "";
+    display: block;
+    height: 50px; /* space for the footer overlap */
+}
+
 body {
     background-color: var(--color-background);
     font-family: 'Fira Sans', serif;
     display: flex;
     flex-direction: column;
+    min-height: 100%;
+    margin: 8px;
 }
 
 header {
     background-color: var(--color-primary);
-    border-radius: 1em;
+    border-radius: var(--rounded);
 }
 
 @keyframes fadeIn {
@@ -41,6 +50,7 @@ header {
 }
 
 .logo {
+    margin-left: 0.5em;
     animation: fadeIn 1s ease-in-out;
     transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
     cursor: default;
@@ -69,7 +79,7 @@ nav {
     background-color: var(--color-secondary);
     padding: 1em 2em;
     cursor: pointer;
-    border-radius: 1em;
+    border-radius: var(--rounded);
 }
 
 .burger {
@@ -111,7 +121,7 @@ nav {
         position: absolute;
         top: 60px;
         background: var(--color-secondary);
-        border-radius: 1em;
+        border-radius: var(--rounded);
     }
 
     .nav-links li {
@@ -121,13 +131,13 @@ nav {
     }
 
     .nav-links li:first-of-type {
-        border-top-left-radius: 1em;
-        border-top-right-radius: 1em;
+        border-top-left-radius: var(--rounded);
+        border-top-right-radius: var(--rounded);
     }
 
     .nav-links li:last-of-type {
-        border-bottom-left-radius: 1em;
-        border-bottom-right-radius: 1em;
+        border-bottom-left-radius: var(--rounded);
+        border-bottom-right-radius: var(--rounded);
     }
 
     .burger {
@@ -143,11 +153,6 @@ nav li:hover {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 2rem;
-}
-
-/* Ensure last element has 50px margin */
-.main-content > *:last-child {
-    margin-bottom: 50px;
 }
 
 .about-me {
@@ -187,11 +192,11 @@ nav li:hover {
 .project-list li {
     background-color: var(--color-secondary);
     padding: 1rem;
-    border-radius: 4px;
+    border-radius: var(--rounded);
 }
 
 .project-list li a {
-    color: var(--color-accent);
+    color: var(--color-background);
     text-decoration: none;
     font-weight: 600;
 }
@@ -218,11 +223,9 @@ nav li:hover {
     color: #fff;
     padding: 1.5rem;
     text-align: center;
-    border-top-left-radius: 2em;
-    border-top-right-radius: 2em;
-    position: absolute;
-    bottom: 0;
-    width: 93.25%;
+
+    margin-top: -50px;
+    position: relative;
 }
 
 .site-footer nav a {
@@ -237,5 +240,104 @@ nav li:hover {
 
 .site-footer .footer-legal {
     margin-top: 0.5rem;
-    font-size: 0.9rem;
+}
+
+.carousel-section {
+    margin-top: 3rem;
+}
+
+.title-bar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.carousel-title {
+    margin-bottom: 1rem;
+    width: max-content;
+}
+
+/* Tabs bar styling */
+.tabs-bar {
+    display: flex;
+    margin-bottom: 1rem;
+    width: 50%;
+    justify-content: flex-end;
+}
+
+.tab-button {
+    flex: 1;
+}
+
+.tab-button:first-of-type {
+    border-top-left-radius: var(--rounded);
+    border-bottom-left-radius: var(--rounded);
+}
+
+.tab-button:last-of-type {
+    border-top-right-radius: var(--rounded);
+    border-bottom-right-radius: var(--rounded);
+}
+
+.tabs-bar button {
+    flex: 1;
+    padding: 1rem;
+    background: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.tabs-bar button:hover {
+    background: #e0e0e0;
+}
+
+.tabs-bar button.active {
+    background: #7fd1f4ff;
+}
+
+/* Carousel styling */
+
+.carousel {
+    margin: 0 auto;
+    padding: 20px 0;
+    max-width: 100%;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+}
+
+.group {
+    display: flex;
+    gap: 20px;
+    padding-right: 20px;
+    will-change: transform;
+    animation: scrolling 10s linear infinite;
+}
+
+.card {
+    width: 100%;
+    color: white;
+    border-radius: var(--rounded);
+    box-shadow: rgba(0, 0, 0, 0.1) 5px 5px 20px 0;
+    padding: 20px;
+    font-size: xx-large;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;
+}
+
+@keyframes scrolling {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.carousel:hover .group {
+    animation-play-state: paused;
 }

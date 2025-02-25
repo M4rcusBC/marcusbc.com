@@ -1,3 +1,6 @@
+import './carouselTabs.js';
+import createTabsAndInfiniteCarousel from "./carouselTabs.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     loadNav();
 
@@ -6,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     body.appendChild(main);
 
     createLayout(main);
-    
+
 });
 
 function loadNav() {
@@ -17,7 +20,7 @@ function loadNav() {
 
     const logo = document.createElement('h1');
     logo.className = 'logo';
-    logo.textContent = 'My Portfolio';
+    logo.textContent = 'Welcome to marcusbc.com';
     logo.addEventListener('click', () => {
         window.location.href = '/';
     });
@@ -25,7 +28,7 @@ function loadNav() {
     const navLinks = document.createElement('ul');
     navLinks.className = 'nav-links';
 
-    const links = ['About', 'Projects', 'Contact'];
+    const links = ['About', 'Tools', 'Projects', 'Contact'];
     links.forEach(link => {
         const li = document.createElement('li');
         li.textContent = link.toLowerCase();
@@ -56,7 +59,7 @@ function loadNav() {
     body.insertBefore(header, body.firstChild);
 }
 
-function createLayout(parentElement) {
+async function createLayout(parentElement) {
     // About Me section
     const aboutSection = document.createElement('section');
     aboutSection.className = 'about-me';
@@ -68,36 +71,62 @@ function createLayout(parentElement) {
 
     const aboutDetails = document.createElement('div');
     aboutDetails.className = 'about-details';
-    aboutDetails.textContent = 'Hello! I am John Doe, a passionate developer with a love for building user-centric applications.';
+    aboutDetails.textContent = 'My name is Marcus Clements, and I am a current computer science student at UW-La Crosse. I am passionate about software development and learning new technologies, and am always looking for new opportunities to learn and grow.';
     aboutSection.appendChild(aboutDetails);
 
     parentElement.appendChild(aboutSection);
+
+    const cardSets = [
+        {
+            title: 'Languages',
+            content: [`<i class="fa-brands fa-js"></i>`, `<i class="fa-brands fa-html5"></i>`, `<i class="fa-brands fa-css3-alt"></i>`, `<i class="fa-brands fa-python"></i>`, `<i class="fa-brands fa-java"></i>`, 'C/C++']
+        },
+        {
+            title: 'Frameworks',
+            content: ['React', 'Node.js', 'Express', 'Flask', 'Spring']
+        },
+        {
+            title: 'Databases',
+            content: ['MongoDB', 'MySQL', 'PostgresSQL']
+        },
+        {
+            title: 'Other Tools',
+            content: ['Git', 'Docker', 'Jenkins', 'Jira']
+        }
+    ];
+    
+    // Carousel section
+    const carouselSection = document.createElement('section');
+    carouselSection.className = 'carousel-section';
+    createTabsAndInfiniteCarousel(carouselSection, cardSets);
+    parentElement.appendChild(carouselSection);
 
     // Projects section
     const projectsSection = document.createElement('section');
     projectsSection.className = 'projects';
 
     const projectsTitle = document.createElement('h2');
-    projectsTitle.textContent = 'Recent Projects';
+    projectsTitle.textContent = 'Public Repositories';
     projectsSection.appendChild(projectsTitle);
 
     const projectList = document.createElement('ul');
     projectList.className = 'project-list';
 
-    // Example project items
-    const sampleProjects = [
-        { name: 'Project Alpha', link: '#alpha' },
-        { name: 'Project Beta', link: '#beta' },
-        { name: 'Project Gamma', link: '#gamma' },
-    ];
+    // GitHub Repos list
+    const projects = await fetchGitHubRepos('M4rcusBC');
 
-    sampleProjects.forEach(proj => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.textContent = proj.name;
-        a.href = proj.link;
-        li.appendChild(a);
-        projectList.appendChild(li);
+    projects.forEach(proj => {
+        if (proj !== null) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            const p = document.createElement('p');
+            if (proj.description !== null) p.textContent = proj.description;
+            a.textContent = proj.name;
+            a.href = proj.url;
+            li.appendChild(a);
+            li.appendChild(p);
+            projectList.appendChild(li);
+        }
     });
 
     projectsSection.appendChild(projectList);
@@ -115,8 +144,8 @@ function createLayout(parentElement) {
     socialList.className = 'social-list';
 
     const socials = [
-        { name: 'GitHub', link: 'https://github.com/your-username' },
-        { name: 'LinkedIn', link: 'https://linkedin.com/in/your-username' },
+        {name: 'GitHub', link: 'https://github.com/your-username'},
+        {name: 'LinkedIn', link: 'https://linkedin.com/in/your-username'},
     ];
 
     socials.forEach(social => {
@@ -139,9 +168,9 @@ function createLayout(parentElement) {
     // Footer nav
     const footerNav = document.createElement('nav');
     const footerLinks = [
-        { name: 'Source (GitHub)', link: 'https://github.com/M4rcusBC/marcusbc.com', target: '_blank' },
-        { name: 'Sitemap', link: '#sitemap', target: '_self'},
-        { name: 'Privacy Policy', link: '#privacy', target: '_self'}
+        {name: 'Source (GitHub)', link: 'https://github.com/M4rcusBC/marcusbc.com', target: '_blank'},
+        {name: 'Sitemap', link: './sitemap.html', target: '_self'},
+        {name: 'Privacy Policy', link: '#privacy', target: '_self'}
     ];
 
     footerLinks.forEach(fl => {
@@ -166,5 +195,19 @@ function createLayout(parentElement) {
     footerLegal.textContent = '© 2025 Marcus Clements. All rights reserved.';
     footer.appendChild(footerLegal);
 
-    parentElement.appendChild(footer);
+    document.body.appendChild(footer);
+}
+
+async function fetchGitHubRepos(username) {
+    const response = await fetch(`https://api.github.com/users/${username}/repos`);
+    if (!response.ok) {
+        throw new Error(`HTTP error; status: ${response.status}`);
+    }
+
+    const repos = await response.json();
+    return repos.map(repo => ({
+        name: repo['name'],
+        description: repo['description'],
+        url: repo['svn_url']
+    }));
 }
