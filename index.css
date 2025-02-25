@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 :root {
     --color-primary: rgb(92, 114, 133);
     --color-secondary: rgb(129, 140, 120);
@@ -7,28 +9,55 @@
 
 body {
     background-color: var(--color-background);
+    font-family: 'Fira Sans', serif;
 }
 
 header {
     background-color: var(--color-primary);
+    border-radius: 1em;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo {
+    animation: fadeIn 1s ease-in-out;
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+    cursor: default;
+}
+
+.logo:hover {
+    transform: scale(1.1);
+    color: var(--color-accent);
 }
 
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 7px 20px;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
+    padding-left: 0;
 }
 
 .nav-links li {
     margin-left: 20px;
     background-color: var(--color-secondary);
     padding: 1em 2em;
+    cursor: pointer;
+    border-radius: 1em;
 }
 
 .burger {
@@ -49,15 +78,15 @@ nav {
     display: flex !important;
 }
 
-.toggle .line1 {
+.burger.toggle .burger-line:nth-child(1) {
     transform: rotate(-45deg) translate(-5px, 6px);
 }
 
-.toggle .line2 {
+.burger.toggle .burger-line:nth-child(2) {
     opacity: 0;
 }
 
-.toggle .line3 {
+.burger.toggle .burger-line:nth-child(3) {
     transform: rotate(45deg) translate(-5px, -6px);
 }
 
@@ -66,15 +95,27 @@ nav {
     .nav-links {
         display: none;
         flex-direction: column;
-        width: 87%;
+        width: 92%;
         position: absolute;
         top: 60px;
         background: var(--color-secondary);
+        border-radius: 1em;
     }
 
     .nav-links li {
         text-align: center;
-        margin: 10px 0;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .nav-links li:first-of-type {
+        border-top-left-radius: 1em;
+        border-top-right-radius: 1em;
+    }
+
+    .nav-links li:last-of-type {
+        border-bottom-left-radius: 1em;
+        border-bottom-right-radius: 1em;
     }
 
     .burger {
@@ -82,6 +123,6 @@ nav {
     }
 }
 
-nav a:hover {
-    color: var(--color-accent);
+nav li:hover {
+    background-color: var(--color-accent);
 }
