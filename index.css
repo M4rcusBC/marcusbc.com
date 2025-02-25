@@ -7,9 +7,21 @@
     --color-background: rgb(226, 224, 200);
 }
 
+html\, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    flex: 1;
+}
+
 body {
     background-color: var(--color-background);
     font-family: 'Fira Sans', serif;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -125,4 +137,105 @@ nav {
 
 nav li:hover {
     background-color: var(--color-accent);
+}
+
+.main-content {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Ensure last element has 50px margin */
+.main-content > *:last-child {
+    margin-bottom: 50px;
+}
+
+.about-me {
+    display: flex;
+    align-items: center;
+    margin-top: 1em;
+    gap: 2em;
+}
+
+.about-me img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.about-details {
+    flex: 1;
+}
+
+.projects {
+    margin-bottom: 3rem;
+}
+
+.projects h2 {
+    margin-bottom: 1rem;
+}
+
+.project-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.project-list li {
+    background-color: var(--color-secondary);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.project-list li a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.social-links h3 {
+    margin-bottom: 1rem;
+}
+
+.social-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.social-list li a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.site-footer {
+    background-color: var(--color-primary);
+    color: #fff;
+    padding: 1.5rem;
+    text-align: center;
+    border-top-left-radius: 2em;
+    border-top-right-radius: 2em;
+    position: absolute;
+    bottom: 0;
+    width: 93.25%;
+}
+
+.site-footer nav a {
+    color: #fff;
+    margin: 0 0.5rem;
+    text-decoration: none;
+}
+
+.site-footer nav a:hover {
+    text-decoration: underline;
+}
+
+.site-footer .footer-legal {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
 }
