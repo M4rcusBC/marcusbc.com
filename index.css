@@ -223,7 +223,8 @@ nav li:hover {
     color: #fff;
     padding: 1.5rem;
     text-align: center;
-
+    border-top-left-radius: var(--rounded);
+    border-top-right-radius: var(--rounded);
     margin-top: -50px;
     position: relative;
 }
