@@ -32,8 +32,56 @@ export default function createTabsAndInfiniteCarousel(container, cardSets) {
 
             cardSet.content.forEach((item) => {
                 const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = item;
+                card.className = 'card skill-card';
+
+                // Create skill card contents with rating
+                const skillContent = document.createElement('div');
+                skillContent.className = 'skill-content';
+
+                // Add icon if available
+                if (item.icon) {
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'skill-icon';
+                    iconDiv.innerHTML = item.icon;
+                    skillContent.appendChild(iconDiv);
+                }
+
+                // Add skill name
+                const skillName = document.createElement('div');
+                skillName.className = 'skill-name';
+                skillName.textContent = item.name || '';
+                skillContent.appendChild(skillName);
+
+                card.appendChild(skillContent);
+
+                // Create skill rating
+                if (item.level !== undefined) {
+                    const skillRating = document.createElement('div');
+                    skillRating.className = 'skill-rating';
+
+                    const ratingDots = document.createElement('div');
+                    ratingDots.className = 'rating-dots';
+
+                    // Create 5 dots, fill them based on level
+                    for (let j = 1; j <= 5; j++) {
+                        const dot = document.createElement('span');
+                        dot.className = j <= item.level ? 'dot filled' : 'dot';
+                        ratingDots.appendChild(dot);
+                    }
+
+                    // Add level text
+                    const levelText = document.createElement('span');
+                    levelText.className = 'level-text';
+
+                    // Convert level number to text description
+                    const levelDescriptions = ['Novice', 'Beginner', 'Intermediate', 'Advanced', 'Expert'];
+                    levelText.textContent = levelDescriptions[item.level - 1] || '';
+
+                    skillRating.appendChild(ratingDots);
+                    skillRating.appendChild(levelText);
+                    card.appendChild(skillRating);
+                }
+
                 group.appendChild(card);
             });
             tabContent.appendChild(group);

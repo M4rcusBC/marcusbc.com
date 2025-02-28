@@ -1,5 +1,8 @@
-import './carouselTabs.js';
 import createTabsAndInfiniteCarousel from "./carouselTabs.js";
+import createEnhancedAboutSection from "./aboutSection.js";
+import createFeaturedProjects from "./featuredProjects.js";
+import cardSets from "./assets/cardSets.js";
+import createHeroSection from "./heroSection.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     loadNav();
@@ -9,6 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
     body.appendChild(main);
 
     createLayout(main);
+
+    const jumpToTopButton = document.createElement('button');
+    jumpToTopButton.className = 'jump-to-top';
+    jumpToTopButton.style.zIndex = '1000';
+    jumpToTopButton.innerHTML = '&#8679;'; // Unicode for up arrow
+    document.body.appendChild(jumpToTopButton);
+
+    jumpToTopButton.addEventListener('click', () => {
+        window.scrollTo({ top: 0});
+    });
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            jumpToTopButton.style.display = 'block';
+        } else {
+            jumpToTopButton.style.display = 'none';
+        }
+    });
 
 });
 
@@ -60,46 +81,20 @@ function loadNav() {
 }
 
 async function createLayout(parentElement) {
-    // About Me section
-    const aboutSection = document.createElement('section');
-    aboutSection.className = 'about-me';
 
-    const aboutImg = document.createElement('img');
-    aboutImg.src = './assets/100_0018.JPG';
-    aboutImg.alt = 'Profile Picture';
-    aboutSection.appendChild(aboutImg);
+    createHeroSection(parentElement);
+    
+    createEnhancedAboutSection(parentElement);
 
-    const aboutDetails = document.createElement('div');
-    aboutDetails.className = 'about-details';
-    aboutDetails.textContent = 'My name is Marcus Clements, and I am a current computer science student at UW-La Crosse. I am passionate about software development and learning new technologies, and am always looking for new opportunities to learn and grow.';
-    aboutSection.appendChild(aboutDetails);
-
-    parentElement.appendChild(aboutSection);
-
-    const cardSets = [
-        {
-            title: `Languages <i class="fa-solid fa-code"></i>`,
-            content: [`<i class="fa-brands fa-js"></i>`, `<i class="fa-brands fa-html5"></i>`, `<i class="fa-brands fa-css3-alt"></i>`, `<i class="fa-brands fa-python"></i>`, `<i class="fa-brands fa-java"></i>`, 'C/C++']
-        },
-        {
-            title: `Frameworks <i class="fa-solid fa-puzzle-piece"></i>`,
-            content: ['React', 'Node.js', 'Express', 'Angular']
-        },
-        {
-            title: `Databases <i class="fa-solid fa-database"></i>`,
-            content: ['SQLite', 'MySQL', 'PostgresSQL']
-        },
-        {
-            title: `Other Tools <i class="fa-solid fa-toolbox"></i>`,
-            content: ['Git', 'Docker/Compose', 'Jenkins', 'Jira']
-        }
-    ];
+    const cards = cardSets;
     
     // Carousel section
     const carouselSection = document.createElement('section');
     carouselSection.className = 'carousel-section';
-    createTabsAndInfiniteCarousel(carouselSection, cardSets);
+    createTabsAndInfiniteCarousel(carouselSection, cards);
     parentElement.appendChild(carouselSection);
+
+    await createFeaturedProjects(parentElement);
 
     // Projects section
     const projectsSection = document.createElement('section');
@@ -116,7 +111,7 @@ async function createLayout(parentElement) {
     const projects = await fetchGitHubRepos('M4rcusBC');
 
     projects.forEach(proj => {
-        if (proj !== null) {
+        if (proj !== null && proj['name'] !== 'marcusbc.com') {
             const li = document.createElement('li');
             const a = document.createElement('a');
             const p = document.createElement('p');

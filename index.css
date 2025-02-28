@@ -8,6 +8,10 @@
     --rounded: 1em;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -299,7 +303,7 @@ nav li:hover {
 }
 
 .tabs-bar button.active {
-    background: #7fd1f4ff;
+    background: var(--color-accent);
 }
 
 /* Carousel styling */
@@ -323,7 +327,7 @@ nav li:hover {
 
 .card {
     width: 100%;
-    color: white;
+    color: black;
     border-radius: var(--rounded);
     box-shadow: rgba(0, 0, 0, 0.1) 5px 5px 20px 0;
     padding: 20px;
@@ -345,4 +349,189 @@ nav li:hover {
 
 .carousel:hover .group {
     animation-play-state: paused;
+}
+
+.jump-to-top {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s;
+}
+
+.jump-to-top:hover {
+    background-color: var(--color-accent);
+}
+
+/* Better Card Design */
+.card {
+    background-color: var(--color-primary);
+    border-radius: var(--rounded);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+/* Button Design */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: var(--rounded);
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.personality-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.personality-tag {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: #fff;
+    padding: 0.5em 1em;
+    border-radius: var(--rounded);
+    margin: 0.5em;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.personality-tag:hover {
+    background-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+/* Better Project List */
+.project-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.project-item {
+    background-color: white;
+    border-radius: var(--rounded);
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.project-item:hover {
+    transform: translateY(-5px);
+}
+
+.project-item h3 {
+    margin: 0;
+    padding: 1rem;
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.project-item-content {
+    padding: 1rem;
+}
+
+.project-description {
+    margin-bottom: 1rem;
+    color: #555;
+}
+
+/* Skill card styling */
+.skill-card {
+    flex-direction: column;
+    padding: 15px;
+    background-color: var(--color-primary);
+    min-height: 100px;
+    gap: 10px;
+}
+
+.skill-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-icon {
+    font-size: 1.5rem;
+}
+
+.skill-name {
+    font-weight: 500;
+}
+
+.skill-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.rating-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.dot.filled {
+    opacity: 1;
+}
+
+.level-text {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Adjust card animation on hover */
+.card:hover .dot.filled {
+    transform: scale(1.2);
 }
