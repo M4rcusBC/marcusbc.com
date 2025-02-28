@@ -49,9 +49,13 @@ header {
     }
 }
 
+nav {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
 .logo {
     margin-left: 0.5em;
-    animation: fadeIn 1s ease-in-out;
+    animation: fadeIn 1.5s ease-in-out;
     transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
     cursor: default;
 }

@@ -78,20 +78,20 @@ async function createLayout(parentElement) {
 
     const cardSets = [
         {
-            title: 'Languages',
+            title: `Languages <i class="fa-solid fa-code"></i>`,
             content: [`<i class="fa-brands fa-js"></i>`, `<i class="fa-brands fa-html5"></i>`, `<i class="fa-brands fa-css3-alt"></i>`, `<i class="fa-brands fa-python"></i>`, `<i class="fa-brands fa-java"></i>`, 'C/C++']
         },
         {
-            title: 'Frameworks',
-            content: ['React', 'Node.js', 'Express', 'Flask', 'Spring']
+            title: `Frameworks <i class="fa-solid fa-puzzle-piece"></i>`,
+            content: ['React', 'Node.js', 'Express', 'Angular']
         },
         {
-            title: 'Databases',
-            content: ['MongoDB', 'MySQL', 'PostgresSQL']
+            title: `Databases <i class="fa-solid fa-database"></i>`,
+            content: ['SQLite', 'MySQL', 'PostgresSQL']
         },
         {
-            title: 'Other Tools',
-            content: ['Git', 'Docker', 'Jenkins', 'Jira']
+            title: `Other Tools <i class="fa-solid fa-toolbox"></i>`,
+            content: ['Git', 'Docker/Compose', 'Jenkins', 'Jira']
         }
     ];
     
@@ -123,6 +123,11 @@ async function createLayout(parentElement) {
             if (proj.description !== null) p.textContent = proj.description;
             a.textContent = proj.name;
             a.href = proj.url;
+            a.target = '_blank';
+            a.textContent += ' ';
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-arrow-up-right-from-square';
+            a.appendChild(icon);
             li.appendChild(a);
             li.appendChild(p);
             projectList.appendChild(li);

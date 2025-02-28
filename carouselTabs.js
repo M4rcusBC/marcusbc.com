@@ -13,7 +13,7 @@ export default function createTabsAndInfiniteCarousel(container, cardSets) {
 
     cardSets.forEach((cardSet) => {
         const tabButton = document.createElement('button');
-        tabButton.textContent = cardSet.title;
+        tabButton.innerHTML = cardSet.title;
         tabButton.className = 'tab-button';
         const thisIndex = currentIndex;
         tabButton.addEventListener('click', () => {
