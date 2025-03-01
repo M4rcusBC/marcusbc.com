@@ -1,16 +1,29 @@
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
+const mongoose = require('mongoose');
 const AppleStrategy = require('passport-apple');
 const AzureADStrategy = require('passport-azure-ad').OIDCStrategy;
 const GitHubStrategy = require('passport-github2').Strategy;
+const authRoutes = require('./routes/auth');
+const config = require('./config/config');
+const User = require('./models/User');
 
 const app = express();
+
+// Connect to MongoDB
+mongoose.connect(config.MONGODB_URI)
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// Body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Session middleware
 app.use(
     session({
-        secret: 'YOUR_SESSION_SECRET',
+        secret: config.JWT_SECRET,
         resave: false,
         saveUninitialized: true
     })
@@ -21,8 +34,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Serialize/deserialize user
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
 
 /**
  * Apple OAuth
@@ -30,15 +50,40 @@ passport.deserializeUser((obj, done) => done(null, obj));
 passport.use(
     new AppleStrategy(
         {
-            clientID: 'YOUR_APPLE_CLIENT_ID',
-            teamID: 'YOUR_APPLE_TEAM_ID',
-            keyID: 'YOUR_APPLE_KEY_ID',
-            privateKeyString: '-----BEGIN PRIVATE KEY-----\\nYOUR_APPLE_PRIVATE_KEY\\n-----END PRIVATE KEY-----',
+            clientID: config.APPLE_CLIENT_ID,
+            teamID: config.APPLE_TEAM_ID,
+            keyID: config.APPLE_KEY_ID,
+            privateKeyString: config.APPLE_PRIVATE_KEY,
             callbackURL: '/auth/apple/callback',
             scope: ['name', 'email']
         },
-        (accessToken, refreshToken, idToken, profile, done) => {
-            return done(null, profile);
+        async (accessToken, refreshToken, idToken, profile, done) => {
+            try {
+                // Check if user already exists
+                let user = await User.findOne({
+                    'oauthProfiles.provider': 'apple',
+                    'oauthProfiles.id': profile.id
+                });
+
+                if (!user) {
+                    // Create new user
+                    user = new User({
+                        name: profile.name?.firstName + ' ' + profile.name?.lastName,
+                        email: profile.email,
+                        isEmailVerified: true,
+                        oauthProfiles: [{
+                            provider: 'apple',
+                            id: profile.id,
+                            data: profile
+                        }]
+                    });
+                    await user.save();
+                }
+
+                return done(null, user);
+            } catch (error) {
+                return done(error);
+            }
         }
     )
 );
@@ -50,14 +95,39 @@ passport.use(
     new AzureADStrategy(
         {
             identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
-            clientID: 'YOUR_AZUREAD_CLIENT_ID',
-            clientSecret: 'YOUR_AZUREAD_CLIENT_SECRET',
+            clientID: config.AZURE_CLIENT_ID,
+            clientSecret: config.AZURE_CLIENT_SECRET,
             responseType: 'code',
             responseMode: 'query',
-            redirectUrl: 'https://marcusbc.com/auth/azure/callback' // update as needed
+            redirectUrl: config.BASE_URL + '/auth/azure/callback'
         },
-        (issuer, sub, profile, accessToken, refreshToken, done) => {
-            return done(null, profile);
+        async (issuer, sub, profile, accessToken, refreshToken, done) => {
+            try {
+                // Check if user already exists
+                let user = await User.findOne({
+                    'oauthProfiles.provider': 'azure',
+                    'oauthProfiles.id': profile.oid
+                });
+
+                if (!user) {
+                    // Create new user
+                    user = new User({
+                        name: profile.displayName,
+                        email: profile.upn || profile.emails?.[0],
+                        isEmailVerified: true,
+                        oauthProfiles: [{
+                            provider: 'azure',
+                            id: profile.oid,
+                            data: profile
+                        }]
+                    });
+                    await user.save();
+                }
+
+                return done(null, user);
+            } catch (error) {
+                return done(error);
+            }
         }
     )
 );
@@ -68,19 +138,43 @@ passport.use(
 passport.use(
     new GitHubStrategy(
         {
-            clientID: 'YOUR_GITHUB_CLIENT_ID',
-            clientSecret: 'YOUR_GITHUB_CLIENT_SECRET',
+            clientID: config.GITHUB_CLIENT_ID,
+            clientSecret: config.GITHUB_CLIENT_SECRET,
             callbackURL: '/auth/github/callback'
         },
-        (accessToken, refreshToken, profile, done) => {
-            return done(null, profile);
+        async (accessToken, refreshToken, profile, done) => {
+            try {
+                // Check if user already exists
+                let user = await User.findOne({
+                    'oauthProfiles.provider': 'github',
+                    'oauthProfiles.id': profile.id
+                });
+
+                if (!user) {
+                    // Create new user
+                    user = new User({
+                        name: profile.displayName,
+                        email: profile.emails?.[0]?.value,
+                        isEmailVerified: true,
+                        oauthProfiles: [{
+                            provider: 'github',
+                            id: profile.id,
+                            data: profile
+                        }]
+                    });
+                    await user.save();
+                }
+
+                return done(null, user);
+            } catch (error) {
+                return done(error);
+            }
         }
     )
 );
 
-/**
- * Remove the inline /login route since we’ll present the login options from the frontend modal.
- */
+// Auth API Routes
+app.use('/api/auth', authRoutes);
 
 // Apple Routes
 app.get('/auth/apple', passport.authenticate('apple'));
@@ -117,7 +211,7 @@ app.get('/protected', (req, res) => {
     if (!req.isAuthenticated()) {
         return res.redirect('/');
     }
-    res.send(`Hello, ${req.user && req.user.displayName ? req.user.displayName : 'User'}!`);
+    res.send(`Hello, ${req.user && req.user.name ? req.user.name : 'User'}!`);
 });
 
 // Logout
