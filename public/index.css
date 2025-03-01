@@ -551,3 +551,70 @@ nav li:hover {
     z-index: 997; /* Below the nav-links but above everything else */
     display: none;
 }
+/* Dark overlay behind modal */
+.overlay-login {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal container */
+.modal-container-login {
+    background-color: var(--color-background);
+    border-radius: var(--rounded);
+    max-width: 400px;
+    width: 90%;
+    padding: 1.5em;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* Close button */
+.modal-close-btn {
+    position: absolute;
+    top: 0.5em;
+    right: 0.75em;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--color-primary);
+}
+
+/* Title styling */
+.modal-container-login h2 {
+    margin-top: 0;
+    margin-bottom: 1em;
+    color: var(--color-primary);
+    text-align: center;
+}
+
+/* Links list */
+.login-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+.login-link-list li {
+    margin: 0.75em 0;
+}
+
+.login-link-list li a {
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 600;
+    transition: color 0.2s ease-in-out;
+}
+
+.login-link-list li a:hover {
+    color: var(--color-accent);
+}
