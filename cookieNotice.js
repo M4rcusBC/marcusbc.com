@@ -80,7 +80,7 @@ function showCookieSettings() {
                 <div class="cookie-option">
                     <input type="checkbox" id="analytics-cookies" checked>
                     <label for="analytics-cookies">Analytics Cookies</label>
-                    <p>These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site.</p>
+                    <p>These cookies allow me to count visits and traffic sources so I can measure and improve the performance of my site.</p>
                 </div>
             </div>
             

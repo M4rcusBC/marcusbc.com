@@ -36,16 +36,46 @@ export function loadNav() {
         burger.appendChild(div);
     }
 
+    // Create a modal backdrop for detecting clicks outside the menu
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.className = 'modal-backdrop';
+    modalBackdrop.style.display = 'none';
+
+    // Toggle menu and modal backdrop when burger is clicked
     burger.addEventListener('click', () => {
         navLinks.classList.toggle('nav-active');
         burger.classList.toggle('toggle');
+
+        // Only show backdrop when menu is active on mobile
+        if (navLinks.classList.contains('nav-active') && window.innerWidth <= 768) {
+            modalBackdrop.style.display = 'block';
+        } else {
+            modalBackdrop.style.display = 'none';
+        }
+    });
+
+    // Close menu when clicking outside (on the modal backdrop)
+    modalBackdrop.addEventListener('click', () => {
+        navLinks.classList.remove('nav-active');
+        burger.classList.remove('toggle');
+        modalBackdrop.style.display = 'none';
     });
 
     nav.appendChild(logo);
     nav.appendChild(navLinks);
     nav.appendChild(burger);
     header.appendChild(nav);
+    body.insertBefore(modalBackdrop, body.firstChild); // Add backdrop to body
     body.insertBefore(header, body.firstChild);
+
+    // Handle window resize to hide/show backdrop appropriately
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            modalBackdrop.style.display = 'none';
+        } else if (navLinks.classList.contains('nav-active')) {
+            modalBackdrop.style.display = 'block';
+        }
+    });
 }
 
 export function loadFooter(parentElement) {
@@ -66,6 +96,7 @@ export function loadFooter(parentElement) {
         if (fl.name !== 'Sitemap') {
             a.href = fl.link;
         } else {
+            a.style.cursor = 'pointer';
             a.addEventListener('click', () => {
                 showSitemap();
             });
