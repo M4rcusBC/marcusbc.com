@@ -26,8 +26,6 @@ passport.deserializeUser((obj, done) => done(null, obj));
 
 /**
  * Apple OAuth
- * Install passport-apple: npm install passport-apple
- * Apple dev portal requires generating a service key, etc.
  */
 passport.use(
     new AppleStrategy(
@@ -40,7 +38,6 @@ passport.use(
             scope: ['name', 'email']
         },
         (accessToken, refreshToken, idToken, profile, done) => {
-            // Store or retrieve user in DB
             return done(null, profile);
         }
     )
@@ -48,8 +45,6 @@ passport.use(
 
 /**
  * Microsoft (Azure AD)
- * Install passport-azure-ad: npm install passport-azure-ad
- * In the Azure App Registration, set the callback to /auth/azure/callback
  */
 passport.use(
     new AzureADStrategy(
@@ -62,7 +57,6 @@ passport.use(
             redirectUrl: 'https://marcusbc.com/auth/azure/callback' // update as needed
         },
         (issuer, sub, profile, accessToken, refreshToken, done) => {
-            // Store or retrieve user in DB
             return done(null, profile);
         }
     )
@@ -70,8 +64,6 @@ passport.use(
 
 /**
  * GitHub OAuth
- * Install passport-github2: npm install passport-github2
- * Configure callback in GitHub Developer Settings
  */
 passport.use(
     new GitHubStrategy(
@@ -81,27 +73,19 @@ passport.use(
             callbackURL: '/auth/github/callback'
         },
         (accessToken, refreshToken, profile, done) => {
-            // Store or retrieve user in DB
             return done(null, profile);
         }
     )
 );
 
-// Routes
-app.get('/login', (req, res) => {
-    res.send(`
-    <h1>OAuth Demo</h1>
-    <ul>
-      <li><a href="/auth/apple">Sign in with Apple</a></li>
-      <li><a href="/auth/azure">Sign in with Microsoft</a></li>
-      <li><a href="/auth/github">Sign in with GitHub</a></li>
-    </ul>
-  `);
-});
+/**
+ * Remove the inline /login route since we’ll present the login options from the frontend modal.
+ */
 
 // Apple Routes
 app.get('/auth/apple', passport.authenticate('apple'));
-app.post('/auth/apple/callback',
+app.post(
+    '/auth/apple/callback',
     passport.authenticate('apple', { failureRedirect: '/' }),
     (req, res) => {
         res.redirect('/protected');
@@ -110,7 +94,8 @@ app.post('/auth/apple/callback',
 
 // Microsoft (Azure) Routes
 app.get('/auth/azure', passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }));
-app.get('/auth/azure/callback',
+app.get(
+    '/auth/azure/callback',
     passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }),
     (req, res) => {
         res.redirect('/protected');
@@ -119,7 +104,8 @@ app.get('/auth/azure/callback',
 
 // GitHub Routes
 app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-app.get('/auth/github/callback',
+app.get(
+    '/auth/github/callback',
     passport.authenticate('github', { failureRedirect: '/' }),
     (req, res) => {
         res.redirect('/protected');
