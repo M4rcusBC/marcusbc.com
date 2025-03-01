@@ -85,7 +85,7 @@ export default async function createFeaturedProjects(parentElement) {
                     e.preventDefault();
                     alert('You\'re already here! Check out the source code linked towards the bottom of the page instead.');
                 };
-                liveLink.innerHTML = 'Live Demo: You\'re already viewing the latest build!';
+                liveLink.innerHTML = 'Live Demo';
             } else {
                 liveLink.href = project.liveLink;
                 liveLink.innerHTML = 'Live Demo <i class="fa-solid fa-external-link-alt"></i>';
