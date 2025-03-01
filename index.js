@@ -3,9 +3,12 @@ import createEnhancedAboutSection from "./aboutSection.js";
 import createFeaturedProjects from "./featuredProjects.js";
 import cardSets from "./assets/cardSets.js";
 import createHeroSection from "./heroSection.js";
+import createNav from "./nav.js";
+import createFooter from "./footer.js";
+import {addCookieNotice} from "./cookie-notice/cookie-notice";
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadNav();
+    createNav();
 
     const main = document.createElement('main');
     const body = document.body;
@@ -31,54 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    addCookieNotice();
+
 });
-
-function loadNav() {
-    const body = document.body;
-
-    const header = document.createElement('header');
-    const nav = document.createElement('nav');
-
-    const logo = document.createElement('h1');
-    logo.className = 'logo';
-    logo.textContent = 'Welcome to marcusbc.com';
-    logo.addEventListener('click', () => {
-        window.location.href = '/';
-    });
-
-    const navLinks = document.createElement('ul');
-    navLinks.className = 'nav-links';
-
-    const links = ['About', 'Tools', 'Projects', 'Contact'];
-    links.forEach(link => {
-        const li = document.createElement('li');
-        li.textContent = link.toLowerCase();
-        li.addEventListener('click', () => {
-            window.location.href = `#${link.toLowerCase()}`;
-        });
-        navLinks.appendChild(li);
-    });
-
-    const burger = document.createElement('div');
-    burger.className = 'burger';
-    const NUM_BURGER_LINES = 3;
-    for (let i = 0; i < NUM_BURGER_LINES; i++) {
-        const div = document.createElement('div');
-        div.className = `burger-line`;
-        burger.appendChild(div);
-    }
-
-    burger.addEventListener('click', () => {
-        navLinks.classList.toggle('nav-active');
-        burger.classList.toggle('toggle');
-    });
-
-    nav.appendChild(logo);
-    nav.appendChild(navLinks);
-    nav.appendChild(burger);
-    header.appendChild(nav);
-    body.insertBefore(header, body.firstChild);
-}
 
 async function createLayout(parentElement) {
 
@@ -161,41 +119,7 @@ async function createLayout(parentElement) {
     socialSection.appendChild(socialList);
     parentElement.appendChild(socialSection);
 
-    // Footer section
-    const footer = document.createElement('footer');
-    footer.className = 'site-footer';
-
-    // Footer nav
-    const footerNav = document.createElement('nav');
-    const footerLinks = [
-        {name: 'Source (GitHub)', link: 'https://github.com/M4rcusBC/marcusbc.com', target: '_blank'},
-        {name: 'Sitemap', link: './sitemap.html', target: '_self'},
-        {name: 'Privacy Policy', link: '#privacy', target: '_self'}
-    ];
-
-    footerLinks.forEach(fl => {
-        const a = document.createElement('a');
-        a.textContent = fl.name;
-        a.href = fl.link;
-        a.target = fl.target;
-        footerNav.appendChild(a);
-        if (fl.target === '_blank') {
-            a.textContent += ' ';
-            const icon = document.createElement('i');
-            icon.className = 'fa-solid fa-arrow-up-right-from-square';
-            a.appendChild(icon);
-        }
-    });
-
-    footer.appendChild(footerNav);
-
-    // Footer legal info
-    const footerLegal = document.createElement('div');
-    footerLegal.className = 'footer-legal';
-    footerLegal.textContent = '© 2025 Marcus Clements. All rights reserved.';
-    footer.appendChild(footerLegal);
-
-    document.body.appendChild(footer);
+    createFooter(document.body);
 }
 
 async function fetchGitHubRepos(username) {
