@@ -1,7 +1,18 @@
 import { loadNav, loadFooter } from "./shared.js";
 import { addCookieNotice } from "./cookieNotice.js";
 
-document.addEventListener('DOMContentLoaded', () => {
+function loadTurnstileScript() {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+    return new Promise((resolve) => {
+        script.onload = resolve;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     loadNav();
 
     const main = document.createElement('main');
@@ -13,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFooter(document.body);
     addCookieNotice();
 
+    await loadTurnstileScript();
+
     const jumpToTopButton = document.createElement('button');
     jumpToTopButton.className = 'jump-to-top';
     jumpToTopButton.style.zIndex = '1000';
@@ -20,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(jumpToTopButton);
 
     jumpToTopButton.addEventListener('click', () => {
-        window.scrollTo({ top: 0 });
+        window.scrollTo({top: 0});
     });
 
     window.addEventListener('scroll', () => {
@@ -75,9 +88,41 @@ function createLayout(parentElement) {
     const nameGroup = createFormGroup('name', 'text', 'Your Name*', true);
     form.appendChild(nameGroup);
 
-    // Email field
-    const emailGroup = createFormGroup('email', 'email', 'Your Email*', true);
-    form.appendChild(emailGroup);
+    // Contact method field (replacing email field)
+    const contactGroup = document.createElement('div');
+    contactGroup.className = 'form-group contact-method-group';
+
+    const contactLabel = document.createElement('label');
+    contactLabel.htmlFor = 'contactMethod';
+    contactLabel.textContent = 'Contact Method*';
+
+    const contactWrapper = document.createElement('div');
+    contactWrapper.className = 'contact-input-wrapper';
+
+    const contactInput = document.createElement('input');
+    contactInput.type = 'text';
+    contactInput.id = 'contactMethod';
+    contactInput.name = 'contactMethod';
+    contactInput.placeholder = 'Email, phone, or social handle';
+    contactInput.required = true;
+
+    const methodIcon = document.createElement('i');
+    methodIcon.className = 'fa-solid fa-circle-question contact-type-icon';
+    methodIcon.title = 'Enter your preferred contact method';
+
+    const methodType = document.createElement('span');
+    methodType.className = 'contact-type-label';
+
+    contactWrapper.appendChild(contactInput);
+    contactWrapper.appendChild(methodIcon);
+    contactWrapper.appendChild(methodType);
+
+    contactGroup.appendChild(contactLabel);
+    contactGroup.appendChild(contactWrapper);
+    form.appendChild(contactGroup);
+
+    // Add event listener to detect contact method type
+    contactInput.addEventListener('input', detectContactMethod);
 
     // Subject field
     const subjectGroup = createFormGroup('subject', 'text', 'Subject*', true);
@@ -102,6 +147,12 @@ function createLayout(parentElement) {
 
     form.appendChild(messageGroup);
 
+    // Add Turnstile widget container before the submit button
+    const turnstileContainer = document.createElement('div');
+    turnstileContainer.className = 'turnstile-container';
+    turnstileContainer.id = 'turnstile-widget';
+    form.appendChild(turnstileContainer);
+
     // Form error message container
     const errorContainer = document.createElement('div');
     errorContainer.className = 'error-container';
@@ -120,6 +171,21 @@ function createLayout(parentElement) {
     form.addEventListener('submit', handleFormSubmit);
 
     formSection.appendChild(form);
+
+    window.onload = function() {
+        if (window.turnstile) {
+            window.turnstile.render('#turnstile-widget', {
+                sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
+                callback: function(token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = 'cf-turnstile-response';
+                    tokenInput.value = token;
+                    form.appendChild(tokenInput);
+                }
+            });
+        }
+    };
 
     // Social Links Section
     const socialSection = document.createElement('section');
@@ -306,6 +372,119 @@ function createLayout(parentElement) {
     parentElement.appendChild(faqSection);
 }
 
+function detectContactMethod(event) {
+    const input = event.target;
+    const value = input.value.trim();
+    const wrapper = input.closest('.contact-input-wrapper');
+    const icon = wrapper.querySelector('.contact-type-icon');
+    const label = wrapper.querySelector('.contact-type-label');
+
+    // Remove any existing type classes
+    wrapper.classList.remove('type-email', 'type-phone', 'type-social', 'type-invalid');
+
+    if (!value) {
+        // Empty input
+        icon.className = 'fa-solid fa-circle-question contact-type-icon';
+        icon.title = 'Enter your preferred contact method';
+        label.textContent = '';
+        return;
+    }
+
+    // Check for email pattern
+    if (validateEmail(value)) {
+        wrapper.classList.add('type-email');
+        icon.className = 'fa-solid fa-envelope contact-type-icon';
+        icon.title = 'Email detected';
+        label.textContent = 'Email';
+        input.setCustomValidity('');
+        return;
+    }
+
+    // Check for phone pattern (basic international and local formats)
+    if (validatePhone(value)) {
+        wrapper.classList.add('type-phone');
+        icon.className = 'fa-solid fa-phone contact-type-icon';
+        icon.title = 'Phone number detected';
+        label.textContent = 'Phone';
+        input.setCustomValidity('');
+        return;
+    }
+
+    // Check for social handle patterns
+    const socialType = detectSocialHandle(value);
+    if (socialType) {
+        wrapper.classList.add('type-social');
+        icon.className = `fa-brands ${socialType.icon} contact-type-icon`;
+        icon.title = `${socialType.name} handle detected`;
+        label.textContent = socialType.name;
+        input.setCustomValidity('');
+        return;
+    }
+
+    // If no valid pattern detected
+    wrapper.classList.add('type-invalid');
+    icon.className = 'fa-solid fa-circle-exclamation contact-type-icon';
+    icon.title = 'Unrecognized contact method';
+    label.textContent = 'Unknown';
+    input.setCustomValidity('Please enter a valid email, phone number, or social handle');
+}
+
+// Add validation functions
+function validatePhone(phone) {
+    // Basic phone validation for multiple formats
+    // Handles formats like: +1234567890, (123) 456-7890, 123-456-7890, 123.456.7890
+    const phoneRegex = /^(\+\d{1,3}[ -]?)?\(?\d{3}\)?[ -.]?\d{3}[ -.]?\d{4}$/;
+    return phoneRegex.test(phone);
+}
+
+function detectSocialHandle(value) {
+    // Check for common social media handle patterns
+
+    // Twitter/X handle
+    if (value.includes('twitter.com/') ||
+        value.includes('x.com/')) {
+        return {
+            name: ' Twitter/X',
+            icon: 'fa-twitter'
+        };
+    }
+
+    // Instagram handle
+    if (value.includes('instagram.com/')) {
+        return {
+            name: ' Instagram',
+            icon: 'fa-instagram'
+        };
+    }
+
+    // LinkedIn profile
+    if (value.includes('linkedin.com/in/')) {
+        return {
+            name: 'LinkedIn',
+            icon: 'fa-linkedin-in'
+        };
+    }
+
+    // GitHub handle
+    if (value.includes('github.com/')) {
+        return {
+            name: 'GitHub',
+            icon: 'fa-github'
+        };
+    }
+
+    // Facebook profile
+    if (value.includes('facebook.com/')) {
+        return {
+            name: 'Facebook',
+            icon: 'fa-facebook-f'
+        };
+    }
+
+    return null;
+}
+
+
 function createFormGroup(id, type, labelText, isRequired = false) {
     const group = document.createElement('div');
     group.className = 'form-group';
@@ -336,43 +515,94 @@ function handleFormSubmit(event) {
 
     // Get form data
     const formData = new FormData(form);
+
+    const turnstileResponse = formData.get('cf-turnstile-response');
+    if (!turnstileResponse) {
+        showError(errorContainer, 'Please complete the Turnstile challenge.');
+        return;
+    }
+
+
     const name = formData.get('name');
-    const email = formData.get('email');
+    const contactMethod = formData.get('contactMethod');
     const subject = formData.get('subject');
     const message = formData.get('message');
 
     // Basic validation
-    if (!name || !email || !subject || !message) {
+    if (!name || !contactMethod || !subject || !message) {
         showError(errorContainer, 'Please fill in all required fields.');
         return;
     }
 
-    if (!validateEmail(email)) {
-        showError(errorContainer, 'Please enter a valid email address.');
+    // Validate contact method (it's already validated during input)
+    const contactInput = form.querySelector('#contactMethod');
+    if (contactInput.validity.customError) {
+        showError(errorContainer, contactInput.validationMessage);
         return;
     }
 
-    // Show sending state
     const submitButton = form.querySelector('.submit-btn');
     const originalText = submitButton.textContent;
     submitButton.textContent = 'Sending...';
     submitButton.disabled = true;
 
-    // Simulate form submission (replace with actual submission code)
-    setTimeout(() => {
-        // Show success message
-        form.reset();
-        submitButton.textContent = 'Message Sent!';
+    // Send data to your backend for verification
+    submitFormWithTurnstile(formData)
+        .then(response => {
+            if (response.success) {
+                // Success handling
+                form.reset();
+                submitButton.textContent = 'Message Sent!';
 
-        // Reset button after a delay
-        setTimeout(() => {
+                // Reset Turnstile widget
+                if (window.turnstile) {
+                    window.turnstile.reset('#turnstile-widget');
+                }
+
+                // Reset button after a delay
+                setTimeout(() => {
+                    submitButton.textContent = originalText;
+                    submitButton.disabled = false;
+                }, 3000);
+            } else {
+                // Error handling
+                showError(errorContainer, response.error || 'Failed to send message. Please try again.');
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+
+                // Reset Turnstile on failure
+                if (window.turnstile) {
+                    window.turnstile.reset('#turnstile-widget');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Form submission error:', error);
+            showError(errorContainer, 'An unexpected error occurred. Please try again later.');
             submitButton.textContent = originalText;
             submitButton.disabled = false;
-        }, 3000);
 
-        // You would normally submit the form data to your server here
-        console.log('Form submitted:', { name, email, subject, message });
-    }, 1500);
+            // Reset Turnstile on error
+            if (window.turnstile) {
+                window.turnstile.reset('#turnstile-widget');
+            }
+        });
+}
+
+// Function to submit the form with Turnstile validation
+async function submitFormWithTurnstile(formData) {
+    try {
+        // Replace with your actual backend endpoint
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            body: formData
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        throw error;
+    }
 }
 
 function showError(container, message) {

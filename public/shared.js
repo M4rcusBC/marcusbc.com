@@ -10,7 +10,7 @@ export function loadNav() {
     logo.className = 'logo';
     logo.textContent = 'Welcome to marcusbc.com';
     logo.addEventListener('click', () => {
-        window.location.href = './index.html';
+        window.location.href = 'index.html';
     });
 
     const navLinks = document.createElement('ul');

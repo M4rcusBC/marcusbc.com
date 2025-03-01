@@ -182,6 +182,7 @@ main {
 }
 
 .submit-btn {
+    justify-content: center;
     background-color: var(--color-secondary);
     color: white;
     border: none;
@@ -195,7 +196,7 @@ main {
 
 .submit-btn:hover {
     background-color: #2980b9;
-    transform: translateY(-2px);
+    transform: translateY(-c2px);
 }
 
 .submit-btn:disabled {
@@ -432,5 +433,69 @@ main {
 
     .burger.toggle .burger-line:nth-child(3) {
         transform: rotate(45deg) translate(-5px, -6px);
+    }
+}
+
+/* Contact method styling */
+.contact-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.contact-input-wrapper input {
+    padding-right: 90px; /* Space for icon and label */
+}
+
+.contact-type-icon {
+    position: absolute;
+    right: 10px; /* Icon stays at the far right */
+    font-size: 1.2rem;
+    color: #95a5a6;
+    transition: var(--transition);
+}
+
+.contact-type-label {
+    position: absolute;
+    right: 35px; /* Position to the left of the icon */
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-weight: bold;
+    transition: var(--transition);
+    text-align: right;
+    /* No fixed width constraint - can be as long as needed */
+}
+
+/* Styling for different contact types - unchanged */
+.contact-input-wrapper.type-email .contact-type-icon {
+    color: #3498db;
+}
+
+.contact-input-wrapper.type-phone .contact-type-icon {
+    color: #27ae60;
+}
+
+.contact-input-wrapper.type-social .contact-type-icon {
+    color: #9b59b6;
+}
+
+.contact-input-wrapper.type-invalid .contact-type-icon {
+    color: var(--color-accent);
+}
+
+.contact-input-wrapper.type-invalid input {
+    border-color: var(--color-accent);
+}
+
+.turnstile-container {
+    margin-bottom: 1.5em;
+    display: flex;
+    justify-content: center;
+}
+
+/* Center the widget on mobile */
+@media (max-width: 768px) {
+    .turnstile-container iframe {
+        margin: 0 auto;
     }
 }

@@ -27,8 +27,8 @@ export function showSitemap() {
                     <h3>Other Pages</h3>
                     <ul>
                         <li><a href="privacy-policy.html">Privacy Policy</a></li>
-                        <li><a href="./tools.html">Tools</a> </li>
-                        <li><a href="./contact.html">Contact</a></li>
+                        <li><a href="tools.html">Tools</a> </li>
+                        <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
                 
