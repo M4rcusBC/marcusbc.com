@@ -17,7 +17,7 @@ export default function createEnhancedAboutSection(parentElement) {
 
     const aboutTitle = document.createElement('h2');
     aboutTitle.textContent = 'About Me';
-    aboutText.appendChild(aboutTitle);
+    parentElement.appendChild(aboutTitle);
 
     const aboutIntro = document.createElement('p');
     aboutIntro.innerHTML = 'Hello! I\'m <strong>Marcus</strong>, a computer science student at UW-La Crosse with a passion for web development and software engineering.';
@@ -46,7 +46,7 @@ export default function createEnhancedAboutSection(parentElement) {
     quote.textContent = '"I believe good code is like good writing — it should be clear, concise, and tell a story."';
     aboutText.appendChild(quote);
 
-    // Add to container
+    // Add elements to container
     aboutContainer.appendChild(aboutImg);
     aboutContainer.appendChild(aboutText);
     aboutSection.appendChild(aboutContainer);

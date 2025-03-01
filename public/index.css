@@ -163,6 +163,13 @@ nav li:hover {
     padding: 0 2rem;
 }
 
+.about-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
 .about-me {
     display: flex;
     align-items: center;

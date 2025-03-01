@@ -8,7 +8,7 @@ export default function createTabsAndInfiniteCarousel(container, cardSets) {
 
     const carouselTitle = document.createElement('h3');
     carouselTitle.className = 'carousel-title';
-    carouselTitle.textContent = 'Proficiencies';
+    carouselTitle.textContent = 'I have experience with the following';
     container.prepend(carouselTitle);
 
     cardSets.forEach((cardSet) => {
@@ -25,6 +25,7 @@ export default function createTabsAndInfiniteCarousel(container, cardSets) {
         tabContent.className = 'carousel';
         tabContent.style.display = 'none';
 
+        // Adjust groups for different screen sizes ugh
         for (let i = 0; i < 4; i++) {
             const group = document.createElement('div');
             group.className = 'group';
@@ -104,8 +105,8 @@ export default function createTabsAndInfiniteCarousel(container, cardSets) {
         });
     }
 
-    // Default tab
-    showTab(Math.random() * cardSets.length | 0);
+    // Randomly select a tab to display first
+    showTab(Math.floor(Math.random() * cardSets.length));
 
     // Wrap the title and tabs bar in a single container
     const titleBarContainer = document.createElement('div');
