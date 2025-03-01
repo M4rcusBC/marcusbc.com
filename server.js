@@ -211,7 +211,7 @@ app.get('/protected', (req, res) => {
     if (!req.isAuthenticated()) {
         return res.redirect('/');
     }
-    res.send(`Hello, ${req.user && req.user.name ? req.user.name : 'User'}!`);
+    res.send(`Hello, ${req.user?.name ? req.user.name : 'User'}!`);
 });
 
 // Logout
