@@ -1,0 +1,110 @@
+/* Sitemap Modal Styles */
+.sitemap-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.sitemap-modal-visible {
+    opacity: 1;
+}
+
+.sitemap-modal-hidden {
+    opacity: 0;
+}
+
+.sitemap-content {
+    background-color: var(--color-background, rgb(226, 224, 200));
+    padding: 2rem;
+    border-radius: var(--rounded, 1em);
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.close-sitemap {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--color-secondary, rgb(129, 140, 120));
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.close-sitemap:hover {
+    background-color: var(--color-accent, rgb(167, 180, 158));
+}
+
+.sitemap-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.sitemap-section h3 {
+    color: var(--color-primary, rgb(92, 114, 133));
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-accent, rgb(167, 180, 158));
+}
+
+.sitemap-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sitemap-section ul li {
+    margin-bottom: 0.75rem;
+}
+
+.sitemap-section ul li a {
+    color: var(--color-primary, rgb(92, 114, 133));
+    text-decoration: none;
+    transition: color 0.3s, transform 0.3s;
+    display: inline-block;
+}
+
+.sitemap-section ul li a:hover {
+    color: var(--color-accent, rgb(167, 180, 158));
+    transform: translateX(5px);
+}
+
+.sitemap-social li a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    .sitemap-sections {
+        grid-template-columns: 1fr;
+    }
+
+    .sitemap-content {
+        width: 95%;
+        max-height: 85vh;
+        padding: 1.5rem;
+    }
+}

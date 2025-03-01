@@ -1,3 +1,5 @@
+import { showSitemap } from './sitemap.js';
+
 export function loadNav() {
     const body = document.body;
 
@@ -23,6 +25,7 @@ export function loadNav() {
         });
         navLinks.appendChild(li);
     });
+    navLinks.style.zIndex = '999';
 
     const burger = document.createElement('div');
     burger.className = 'burger';
@@ -60,7 +63,13 @@ export function loadFooter(parentElement) {
     footerLinks.forEach(fl => {
         const a = document.createElement('a');
         a.textContent = fl.name;
-        a.href = fl.link;
+        if (fl.name !== 'Sitemap') {
+            a.href = fl.link;
+        } else {
+            a.addEventListener('click', () => {
+                showSitemap();
+            });
+        }
         a.target = fl.target;
         footerNav.appendChild(a);
         if (fl.target === '_blank') {

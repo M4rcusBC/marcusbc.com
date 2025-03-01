@@ -1,6 +1,6 @@
 export function addCookieNotice() {
     // Check if user has already accepted cookies
-    if (localStorage.getItem('cookiesAccepted') === 'true') {
+    if (getCookie('cookiesAccepted') === 'true') {
         return;
     }
 
@@ -24,8 +24,8 @@ export function addCookieNotice() {
     // Add event listeners
     const acceptButton = cookieNotice.querySelector('.accept-cookies');
     acceptButton.addEventListener('click', () => {
-        localStorage.setItem('cookiesAccepted', 'true');
-        localStorage.setItem('cookiesAcceptedDate', new Date().toISOString());
+        setCookie('cookiesAccepted', 'true');
+        setCookie('cookiesAcceptedDate', new Date().toISOString());
         cookieNotice.classList.add('cookie-notice-hidden');
         setTimeout(() => {
             cookieNotice.remove();
@@ -37,10 +37,27 @@ export function addCookieNotice() {
         showCookieSettings();
     });
 
-    // Show cookie notice with animation
-    setTimeout(() => {
-        cookieNotice.classList.add('cookie-notice-visible');
-    }, 1000);
+    // Show cookie notice immediately
+    cookieNotice.offsetHeight;
+    cookieNotice.classList.add('cookie-notice-visible');
+}
+
+function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
+    }
+    return null;
 }
 
 function showCookieSettings() {
@@ -75,6 +92,10 @@ function showCookieSettings() {
 
     document.body.appendChild(modal);
 
+    // Set initial checkbox state based on cookie
+    const analyticsCookiesCheckbox = document.getElementById('analytics-cookies');
+    analyticsCookiesCheckbox.checked = getCookie('analyticsCookies') !== 'false';
+
     // Add event listeners
     const closeButton = modal.querySelector('.close-modal');
     closeButton.addEventListener('click', () => {
@@ -84,9 +105,9 @@ function showCookieSettings() {
     const saveButton = modal.querySelector('.save-preferences');
     saveButton.addEventListener('click', () => {
         const analyticsCookies = document.getElementById('analytics-cookies').checked;
-        localStorage.setItem('cookiesAccepted', 'true');
-        localStorage.setItem('cookiesAcceptedDate', new Date().toISOString());
-        localStorage.setItem('analyticsCookies', analyticsCookies.toString());
+        setCookie('cookiesAccepted', 'true');
+        setCookie('cookiesAcceptedDate', new Date().toISOString());
+        setCookie('analyticsCookies', analyticsCookies.toString());
 
         // Remove cookie notice and modal
         const cookieNotice = document.querySelector('.cookie-notice');

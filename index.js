@@ -4,7 +4,7 @@ import createFeaturedProjects from "./featuredProjects.js";
 import cardSets from "./assets/cardSets.js";
 import createHeroSection from "./heroSection.js";
 import { loadNav, loadFooter } from "./shared.js";
-import {addCookieNotice} from "./cookieNotice.js";
+import { addCookieNotice } from "./cookieNotice.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     loadNav();
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const jumpToTopButton = document.createElement('button');
     jumpToTopButton.className = 'jump-to-top';
-    jumpToTopButton.style.zIndex = '1000';
+    jumpToTopButton.style.zIndex = '999';
     jumpToTopButton.innerHTML = '&#8679;'; // Unicode for up arrow
     document.body.appendChild(jumpToTopButton);
 
@@ -48,6 +48,7 @@ async function createLayout(parentElement) {
     // Carousel section
     const carouselSection = document.createElement('section');
     carouselSection.className = 'carousel-section';
+    carouselSection.id = 'proficiencies';
     createTabsAndInfiniteCarousel(carouselSection, cards);
     parentElement.appendChild(carouselSection);
 

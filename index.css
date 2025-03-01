@@ -259,7 +259,6 @@ nav li:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
 }
 
 .carousel-title {
@@ -270,7 +269,7 @@ nav li:hover {
 /* Tabs bar styling */
 .tabs-bar {
     display: flex;
-    margin-bottom: 1rem;
+    padding: 1em;
     width: 50%;
     justify-content: flex-end;
 }
@@ -405,7 +404,7 @@ nav li:hover {
 }
 
 .btn-primary:hover {
-    background-color: var(--color-accent);
+    background-color: var(--color-secondary);
     transform: translateY(-2px);
 }
 
@@ -519,7 +518,6 @@ nav li:hover {
     border-radius: 50%;
     background-color: var(--color-accent);
     opacity: 0.3;
-    transition: opacity 0.3s ease;
 }
 
 .dot.filled {
@@ -532,6 +530,6 @@ nav li:hover {
 }
 
 /* Adjust card animation on hover */
-.card:hover .dot.filled {
-    transform: scale(1.2);
+.card:hover {
+    transform: scale(1.1);
 }
