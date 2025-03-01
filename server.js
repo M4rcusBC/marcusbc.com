@@ -1,83 +1,151 @@
-require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-const path = require('path');
-const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
+const AppleStrategy = require('passport-apple');
+const AzureADStrategy = require('passport-azure-ad').OIDCStrategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 
 const app = express();
-const PORT = process.env.PORT || 80;
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Session middleware
+app.use(
+    session({
+        secret: 'YOUR_SESSION_SECRET',
+        resave: false,
+        saveUninitialized: true
+    })
+);
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Contact form endpoint
-app.post('/api/contact', async (req, res) => {
-    try {
-        // Get the turnstile token from the request
-        const turnstileResponse = req.body['cf-turnstile-response'];
+// Serialize/deserialize user
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
 
-        if (!turnstileResponse) {
-            return res.json({
-                success: false,
-                error: 'Turnstile token missing'
-            });
+/**
+ * Apple OAuth
+ * Install passport-apple: npm install passport-apple
+ * Apple dev portal requires generating a service key, etc.
+ */
+passport.use(
+    new AppleStrategy(
+        {
+            clientID: 'YOUR_APPLE_CLIENT_ID',
+            teamID: 'YOUR_APPLE_TEAM_ID',
+            keyID: 'YOUR_APPLE_KEY_ID',
+            privateKeyString: '-----BEGIN PRIVATE KEY-----\\nYOUR_APPLE_PRIVATE_KEY\\n-----END PRIVATE KEY-----',
+            callbackURL: '/auth/apple/callback',
+            scope: ['name', 'email']
+        },
+        (accessToken, refreshToken, idToken, profile, done) => {
+            // Store or retrieve user in DB
+            return done(null, profile);
         }
+    )
+);
 
-        // Verify the token with Cloudflare
-        const verificationResponse = await fetch(
-            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    secret: process.env.TURNSTILE_SECRET_KEY,
-                    response: turnstileResponse,
-                    remoteip: req.ip,
-                }),
-            }
-        );
-
-        const verificationResult = await verificationResponse.json();
-
-        if (!verificationResult.success) {
-            return res.json({
-                success: false,
-                error: 'Turnstile verification failed'
-            });
+/**
+ * Microsoft (Azure AD)
+ * Install passport-azure-ad: npm install passport-azure-ad
+ * In the Azure App Registration, set the callback to /auth/azure/callback
+ */
+passport.use(
+    new AzureADStrategy(
+        {
+            identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+            clientID: 'YOUR_AZUREAD_CLIENT_ID',
+            clientSecret: 'YOUR_AZUREAD_CLIENT_SECRET',
+            responseType: 'code',
+            responseMode: 'query',
+            redirectUrl: 'https://marcusbc.com/auth/azure/callback' // update as needed
+        },
+        (issuer, sub, profile, accessToken, refreshToken, done) => {
+            // Store or retrieve user in DB
+            return done(null, profile);
         }
+    )
+);
 
-        // Process the form data - example: log it
-        console.log('Form submission:', req.body);
+/**
+ * GitHub OAuth
+ * Install passport-github2: npm install passport-github2
+ * Configure callback in GitHub Developer Settings
+ */
+passport.use(
+    new GitHubStrategy(
+        {
+            clientID: 'YOUR_GITHUB_CLIENT_ID',
+            clientSecret: 'YOUR_GITHUB_CLIENT_SECRET',
+            callbackURL: '/auth/github/callback'
+        },
+        (accessToken, refreshToken, profile, done) => {
+            // Store or retrieve user in DB
+            return done(null, profile);
+        }
+    )
+);
 
-        // Here you would typically send an email, save to database, etc.
-        // For example, you might want to use a package like nodemailer to send emails
+// Routes
+app.get('/login', (req, res) => {
+    res.send(`
+    <h1>OAuth Demo</h1>
+    <ul>
+      <li><a href="/auth/apple">Sign in with Apple</a></li>
+      <li><a href="/auth/azure">Sign in with Microsoft</a></li>
+      <li><a href="/auth/github">Sign in with GitHub</a></li>
+    </ul>
+  `);
+});
 
-        return res.json({
-            success: true,
-            message: 'Form submitted successfully!'
-        });
-    } catch (error) {
-        console.error('Server error:', error);
-        return res.status(500).json({
-            success: false,
-            error: 'Server error occurred'
-        });
+// Apple Routes
+app.get('/auth/apple', passport.authenticate('apple'));
+app.post('/auth/apple/callback',
+    passport.authenticate('apple', { failureRedirect: '/' }),
+    (req, res) => {
+        res.redirect('/protected');
     }
+);
+
+// Microsoft (Azure) Routes
+app.get('/auth/azure', passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }));
+app.get('/auth/azure/callback',
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }),
+    (req, res) => {
+        res.redirect('/protected');
+    }
+);
+
+// GitHub Routes
+app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+app.get('/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/' }),
+    (req, res) => {
+        res.redirect('/protected');
+    }
+);
+
+// Protected
+app.get('/protected', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/');
+    }
+    res.send(`Hello, ${req.user && req.user.displayName ? req.user.displayName : 'User'}!`);
 });
 
-// For any other routes, serve the index.html file (SPA support)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Logout
+app.get('/logout', (req, res) => {
+    req.logout(() => {
+        res.redirect('/');
+    });
 });
 
+// Default route - send public index.html
+app.use(express.static('public'));
+
+// Start server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
