@@ -18,7 +18,7 @@ export function showSitemap() {
                     <ul>
                         <li><a href="#top">Home</a></li>
                         <li><a href="#about">About Me</a></li>
-                        <li><a href="#proficiencies">Skills</a></li>
+                        <li><a href="#proficiencies">Proficiencies</a></li>
                         <li><a href="#projects">Projects</a></li>
                     </ul>
                 </div>
@@ -37,7 +37,7 @@ export function showSitemap() {
                     <ul class="sitemap-social">
                         <li><a href="#"><i class="fa-brands fa-github"></i> GitHub</a></li>
                         <li><a href="#"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
-                        <li><a href="#"><i class="fa-solid fa-envelope"></i> Email</a></li>
+                        <li><a href="mailto:marcus.bc@icloud.com"><i class="fa-solid fa-envelope"></i> Email</a></li>
                     </ul>
                 </div>
             </div>

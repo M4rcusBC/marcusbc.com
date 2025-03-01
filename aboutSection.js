@@ -6,15 +6,10 @@ export default function createEnhancedAboutSection(parentElement) {
     const aboutContainer = document.createElement('div');
     aboutContainer.className = 'about-container';
 
-    // Image container
-    const imgContainer = document.createElement('div');
-    imgContainer.className = 'profile-img-container';
-
     const aboutImg = document.createElement('img');
     aboutImg.className = 'profile-img';
     aboutImg.src = './assets/100_0018.JPG';
     aboutImg.alt = 'Marcus Clements';
-    imgContainer.appendChild(aboutImg);
 
     // Text content
     const aboutText = document.createElement('div');
@@ -52,7 +47,7 @@ export default function createEnhancedAboutSection(parentElement) {
     aboutText.appendChild(quote);
 
     // Add to container
-    aboutContainer.appendChild(imgContainer);
+    aboutContainer.appendChild(aboutImg);
     aboutContainer.appendChild(aboutText);
     aboutSection.appendChild(aboutContainer);
 

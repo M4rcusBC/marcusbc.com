@@ -16,7 +16,7 @@ export function loadNav() {
     const navLinks = document.createElement('ul');
     navLinks.className = 'nav-links';
 
-    const links = ['About', 'Tools', 'Projects', 'Contact'];
+    const links = ['Tools', 'Projects', 'Contact', 'Login'];
     links.forEach(link => {
         const li = document.createElement('li');
         li.textContent = link.toLowerCase();
