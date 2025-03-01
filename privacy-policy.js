@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createPrivacyContent(main);
 
-    loadFooter();
+    loadFooter(document.body);
 
     // Back to top button
     const jumpToTopButton = document.createElement('button');

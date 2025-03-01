@@ -1,8 +1,7 @@
-import createNav from "./nav.js";
-import createFooter from "./footer.js";
+import { loadNav, loadFooter} from "./shared.js";
 
 document.addEventListener('DOMContentLoaded', () => {
-    createNav();
+    loadNav();
 
     const main = document.createElement('main');
     const body = document.body;
@@ -10,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // createLayout(main);
 
-    createFooter(document.body);
+    loadFooter(document.body);
 
     const jumpToTopButton = document.createElement('button');
     jumpToTopButton.className = 'jump-to-top';

@@ -11,7 +11,7 @@ export function addCookieNotice() {
         <div class="cookie-content">
             <p>This website uses cookies to enhance your browsing experience. 
                By continuing to use this site, you consent to the use of cookies in accordance with our 
-               <a href="../privacy-policy.html">Privacy Policy</a>.</p>
+               <a href="privacy-policy.html">Privacy Policy</a>.</p>
             <div class="cookie-buttons">
                 <button class="btn btn-primary accept-cookies">Accept</button>
                 <button class="btn btn-secondary cookie-settings">Cookie Settings</button>

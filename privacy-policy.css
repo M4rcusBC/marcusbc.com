@@ -1,0 +1,36 @@
+/* Privacy Policy specific styles */
+.privacy-content {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    background-color: white;
+    border-radius: var(--rounded);
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.policy-content {
+    line-height: 1.6;
+}
+
+.policy-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+}
+
+.policy-content h3 {
+    margin-top: 1.5rem;
+    color: var(--color-secondary);
+}
+
+.policy-content ul {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.last-updated {
+    color: #777;
+    font-style: italic;
+    margin-bottom: 2rem;
+}

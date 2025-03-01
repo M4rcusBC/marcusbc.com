@@ -3,12 +3,11 @@ import createEnhancedAboutSection from "./aboutSection.js";
 import createFeaturedProjects from "./featuredProjects.js";
 import cardSets from "./assets/cardSets.js";
 import createHeroSection from "./heroSection.js";
-import createNav from "./nav.js";
-import createFooter from "./footer.js";
-import {addCookieNotice} from "./cookie-notice/cookie-notice";
+import { loadNav, loadFooter } from "./shared.js";
+import {addCookieNotice} from "./cookieNotice.js";
 
 document.addEventListener('DOMContentLoaded', () => {
-    createNav();
+    loadNav();
 
     const main = document.createElement('main');
     const body = document.body;
@@ -119,7 +118,7 @@ async function createLayout(parentElement) {
     socialSection.appendChild(socialList);
     parentElement.appendChild(socialSection);
 
-    createFooter(document.body);
+    loadFooter(document.body);
 }
 
 async function fetchGitHubRepos(username) {
