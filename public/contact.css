@@ -196,7 +196,7 @@ main {
 
 .submit-btn:hover {
     background-color: #2980b9;
-    transform: translateY(-c2px);
+    transform: translateY(-2px);
 }
 
 .submit-btn:disabled {
@@ -498,4 +498,9 @@ main {
     .turnstile-container iframe {
         margin: 0 auto;
     }
+}
+
+.submit-btn-wrapper {
+    display: flex;
+    justify-content: center;
 }

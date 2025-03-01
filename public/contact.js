@@ -160,12 +160,16 @@ function createLayout(parentElement) {
     form.appendChild(errorContainer);
 
     // Submit button
+    const submitBtnWrapper = document.createElement('div');
+    submitBtnWrapper.className = 'submit-btn-wrapper';
+
     const submitButton = document.createElement('button');
     submitButton.type = 'submit';
     submitButton.className = 'submit-btn';
     submitButton.textContent = 'Send Message';
 
-    form.appendChild(submitButton);
+    submitBtnWrapper.appendChild(submitButton);
+    form.appendChild(submitBtnWrapper);
 
     // Form event listeners for validation and submission
     form.addEventListener('submit', handleFormSubmit);
