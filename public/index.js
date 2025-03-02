@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const jumpToTopButton = document.createElement('button');
     jumpToTopButton.className = 'jump-to-top';
-    jumpToTopButton.style.zIndex = '999';
+    jumpToTopButton.style.zIndex = '1000';
     jumpToTopButton.innerHTML = '&#8679;'; // Unicode for up arrow
     document.body.appendChild(jumpToTopButton);
 
