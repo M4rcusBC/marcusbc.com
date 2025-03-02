@@ -35,7 +35,7 @@ exports.registerEmail = async (req, res) => {
         // Create verification token
         const verificationToken = generateToken();
         const tokenExpires = new Date();
-        tokenExpires.setHours(tokenExpires.getHours() + 24); // 24 hours expiry
+        tokenExpires.setHours(tokenExpires.getHours() + 1); // 1 hour expiry
 
         // Create user
         user = new User({
@@ -55,7 +55,7 @@ exports.registerEmail = async (req, res) => {
         // Send verification email
         await emailService.sendVerificationEmail(email, verificationToken);
 
-        res.json({ success: true, message: 'Registration successful. Please check your email to verify your account.' });
+        res.json({ success: true, message: 'Registration successful. Please check your email to verify your account.\nNote that this token expires in 1 hour.' });
     } catch (error) {
         console.error('Register email error:', error);
         res.status(500).json({ message: 'Server error' });
