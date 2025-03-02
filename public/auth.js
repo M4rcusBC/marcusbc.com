@@ -1,5 +1,5 @@
 // WebAuthn functionality for registration and login
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import { startRegistration, startAuthentication } from 'https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@latest/dist/bundle/index.js';
 
 // Session constants
 const SESSION_COOKIE_NAME = 'authSession';
@@ -15,7 +15,7 @@ export async function handleRegistration(username) {
         statusElement.className = 'status-message info';
 
         // 1. Request registration options from the server
-        const resp = await fetch('/webauthn/register/options', {
+        const resp = await fetch('/webauthn/register/request', {  // <-- Fixed endpoint path
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export async function handleLogin(username) {
         statusElement.className = 'status-message info';
 
         // 1. Request authentication options from the server
-        const resp = await fetch('/webauthn/login/options', {
+        const resp = await fetch('/webauthn/login/request', {  // <-- Fixed endpoint path
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -142,42 +142,32 @@ export async function handleLogin(username) {
     }
 }
 
-// Handle user logout
+// Rest of the functions remain the same
 export function handleLogout() {
-    // Clear authentication cookies
     clearSessionCookies();
 }
 
-// Check if user is logged in
 export function isUserLoggedIn() {
     return !!getCookie(SESSION_COOKIE_NAME);
 }
 
-// Set session cookies
 function setSessionCookies(username, sessionToken) {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + SESSION_DURATION_DAYS);
-
-    // Set session token cookie (HTTP-only for security)
     document.cookie = `${SESSION_COOKIE_NAME}=${sessionToken}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Strict`;
-
-    // Set username cookie (readable by JS for UI purposes)
     document.cookie = `${USERNAME_COOKIE_NAME}=${username}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Strict`;
 }
 
-// Clear session cookies
 function clearSessionCookies() {
     document.cookie = `${SESSION_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
     document.cookie = `${USERNAME_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
 }
 
-// Generate a temporary session token if the server doesn't provide one
 function generateSessionToken() {
     return Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
 }
 
-// Helper function to get cookie value by name
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
