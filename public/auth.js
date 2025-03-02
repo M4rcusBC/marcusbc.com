@@ -1,5 +1,5 @@
 // WebAuthn functionality for registration and login
-import { startRegistration, startAuthentication } from 'https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@latest/dist/bundle/index.js';
+import { startRegistration, startAuthentication } from 'https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@7.1.0/dist/bundle/index.js';
 
 // Session constants
 const SESSION_COOKIE_NAME = 'authSession';
@@ -30,18 +30,15 @@ export async function handleRegistration(username) {
 
         // 2. Get options from server response
         const options = await resp.json();
+        console.log('Received registration options:', options);
 
-        // Ensure options are properly decoded for browser WebAuthn API
-        if (options.user && options.user.id) {
-            options.user.id = base64URLStringToBuffer(options.user.id);
-        }
-        if (options.challenge) {
-            options.challenge = base64URLStringToBuffer(options.challenge);
-        }
+        // No need to manually convert, the library handles base64url strings now
+        // Just pass the options directly to startRegistration
 
         // 3. Start the WebAuthn registration process in the browser
         statusElement.textContent = 'Please follow your device prompts to create passkey...';
         const attResp = await startRegistration(options);
+        console.log('Registration response:', attResp);
 
         // 4. Send the response to the server for verification
         statusElement.textContent = 'Verifying registration...';
@@ -106,25 +103,14 @@ export async function handleLogin(username) {
 
         // 2. Get options from server response
         const options = await resp.json();
+        console.log('Received authentication options:', options);
 
-        // Ensure challenge is properly decoded
-        if (options.challenge) {
-            options.challenge = base64URLStringToBuffer(options.challenge);
-        }
-
-        // Ensure allowCredentials IDs are properly decoded
-        if (options.allowCredentials && Array.isArray(options.allowCredentials)) {
-            options.allowCredentials = options.allowCredentials.map(credential => {
-                return {
-                    ...credential,
-                    id: base64URLStringToBuffer(credential.id)
-                };
-            });
-        }
+        // No need for manual conversion, the library handles base64url strings
 
         // 3. Start the WebAuthn authentication process in the browser
         statusElement.textContent = 'Please follow your device prompts to verify your passkey...';
         const authResp = await startAuthentication(options);
+        console.log('Authentication response:', authResp);
 
         // 4. Send the response to the server for verification
         statusElement.textContent = 'Verifying login...';
@@ -163,22 +149,6 @@ export async function handleLogin(username) {
         statusElement.textContent = `Login failed: ${error.message}`;
         statusElement.className = 'status-message error';
     }
-}
-
-// Helper function to convert base64url string to ArrayBuffer
-function base64URLStringToBuffer(base64URLString) {
-    // Convert from Base64URL to Base64
-    const base64 = base64URLString.replace(/-/g, '+').replace(/_/g, '/');
-    // Pad with '='
-    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
-    // Convert to ArrayBuffer
-    const binary = atob(padded);
-    const buffer = new ArrayBuffer(binary.length);
-    const bytes = new Uint8Array(buffer);
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    return buffer;
 }
 
 // Session management functions

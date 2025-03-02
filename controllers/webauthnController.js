@@ -6,7 +6,7 @@ const User = require('../models/User');
 const rpID = process.env.NODE_ENV === 'production' ? 'marcusbc.com' : 'localhost';
 const expectedOrigin = process.env.NODE_ENV === 'production'
     ? 'https://marcusbc.com'
-    : 'http://localhost:3000';
+    : `http://localhost:${process.env.PORT}`;
 
 // Registration initialization
 exports.requestRegistrationOptions = async (req, res) => {
@@ -22,9 +22,18 @@ exports.requestRegistrationOptions = async (req, res) => {
             user = await User.create({ username });
         }
 
+        // Convert user ID to proper buffer format
+        // Use a consistent method to convert numeric ID to bytes
+        const userId = new Uint8Array(4); // 4 bytes for 32-bit integer
+        userId[0] = (user.id >> 24) & 0xff;
+        userId[1] = (user.id >> 16) & 0xff;
+        userId[2] = (user.id >> 8) & 0xff;
+        userId[3] = user.id & 0xff;
+
         const options = await generateRegistrationOptions({
             rpName: 'marcusbc.com',
             rpID: rpID,
+            userID: userId, // Provide as buffer
             userName: user.username,
             attestationType: 'none',
             authenticatorSelection: {
@@ -36,6 +45,12 @@ exports.requestRegistrationOptions = async (req, res) => {
         // Store challenge in DB
         user.currentChallenge = options.challenge;
         await user.save();
+
+        // Log for debugging
+        console.log('Registration options generated:', {
+            userName: options.user.name,
+            challenge: options.challenge,
+        });
 
         return res.json(options);
     } catch (err) {
