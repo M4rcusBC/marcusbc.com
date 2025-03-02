@@ -1354,7 +1354,8 @@ function addAuthModalStyles() {
     document.head.appendChild(styles);
 }
 
-// Temporary login function for the simplified server implementation export function showLoginModal() { // This is the simplified login modal that works with the current server implementation const overlay = document.createElement('div'); overlay.className = 'overlay-login';
+// Temporary login function for the simplified server implementation export function showLoginModal() { // This is the simplified login modal that works with the current server implementation
+const overlay = document.createElement('div'); overlay.className = 'overlay-login';
 
 const modalContainer = document.createElement("div");
 modalContainer.className = "modal-container-login";
