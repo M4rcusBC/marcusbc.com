@@ -1,6 +1,5 @@
 // WebAuthn functionality for registration and login
-import { startRegistration } from '@simplewebauthn/browser';
-import { startAuthentication } from '@simplewebauthn/browser';
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 
 // Session constants
 const SESSION_COOKIE_NAME = 'authSession';

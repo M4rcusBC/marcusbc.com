@@ -1,5 +1,5 @@
 import {showSitemap} from "./sitemap.js";
-import {handleRegistration, handleLogin, handleLogout, isUserLoggedIn} from "../auth.js";
+import {handleRegistration, handleLogin, handleLogout, isUserLoggedIn} from "./auth.js";
 
 export function loadNav() {
     const body = document.body;

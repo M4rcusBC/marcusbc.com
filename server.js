@@ -15,7 +15,10 @@ sequelize.sync()
 app.use('/webauthn', webauthnRoutes);
 
 // Default route - send public index.html
-app.use(express.static('public'));
+app.use(express.static('public'))
+app.get('/'), (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+}
 
 // Start server
 const PORT = process.env.PORT || 3000;
