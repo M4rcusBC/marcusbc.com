@@ -1,25 +1,25 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../db');
+const sequelize = require('../config/database');
 
-// "User" model for storing user data
 const User = sequelize.define('User', {
+    // Option 1: Use auto-incrementing ID (recommended)
     id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        primaryKey: true
     },
     username: {
         type: DataTypes.STRING,
-        unique: true,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     credentialID: {
         type: DataTypes.BLOB,
-        allowNull: true,
+        allowNull: true
     },
     credentialPublicKey: {
         type: DataTypes.BLOB,
-        allowNull: true,
+        allowNull: true
     },
     credentialCounter: {
         type: DataTypes.INTEGER,
@@ -28,10 +28,13 @@ const User = sequelize.define('User', {
     },
     currentChallenge: {
         type: DataTypes.STRING,
-        allowNull: true,
-    },
+        allowNull: true
+    }
 }, {
-    tableName: 'users',
+    // Add these options to ensure timestamps work correctly
+    timestamps: true,
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 });
 
 module.exports = User;

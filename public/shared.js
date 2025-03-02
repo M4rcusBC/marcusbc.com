@@ -323,7 +323,8 @@ function addModalStyles() {
         .validation-message {
             position: absolute;
             font-size: 12px;
-            margin-top: 4px;
+            margin-top: 6px;
+            margin-bottom: 6px;
             transition: all 0.2s;
         }
 
@@ -429,7 +430,7 @@ function createAuthModal() {
             </div>
             
             <div id="login-form" class="auth-form active">
-                <h2>Sign In with Passkey</h2>
+                <h2>Sign In with a Passkey</h2>
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" placeholder="Enter your username">
