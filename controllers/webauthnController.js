@@ -13,17 +13,17 @@ exports.requestRegistrationOptions = async (req, res) => {
         // Look for existing user, else create
         let user = await User.findOne({ where: { username } });
         if (!user) {
-            user = await User.create({ id: username, username });
+            user = await User.create({ username });
+            // No need to specify ID - it will be auto-incremented
         }
 
-        const options = generateRegistrationOptions({
-            rpName: 'Example WebAuthn App',
-            userID: user.id,
+        const options = await generateRegistrationOptions({
+            rpName: 'marcusbc.com',
             userName: user.username,
         });
 
         // Store challenge in DB
-        user.currentChallenge = (await options).challenge;
+        user.currentChallenge = options.challenge;
         await user.save();
 
         return res.json(options);
@@ -133,7 +133,12 @@ exports.verifyLogin = async (req, res) => {
         user.currentChallenge = null;
         await user.save();
 
-        return res.json({ success: true, message: 'Login successful' });
+        return res.json({
+            success: true,
+            message: 'Login successful',
+            userId: user.id,
+            username: user.username
+        });
     } catch (err) {
         console.error('verifyLogin error:', err);
         return res.status(500).json({ error: 'Server error' });
