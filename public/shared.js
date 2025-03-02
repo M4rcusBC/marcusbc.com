@@ -1,5 +1,5 @@
 import {showSitemap} from "./sitemap.js";
-import {handleRegistration, handleLogin, handleLogout, isUserLoggedIn} from "./auth.js";
+import {handleRegistration, handleLogin, handleLogout, isUserLoggedIn, checkUsernameExists} from "./auth.js";
 
 export function loadNav() {
     const body = document.body;
@@ -293,6 +293,7 @@ function addModalStyles() {
 
         .form-group {
             margin-bottom: 15px;
+            position: relative;
         }
 
         .form-group label {
@@ -307,6 +308,31 @@ function addModalStyles() {
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+        }
+
+        .form-group input.valid-input {
+            border-color: #4CAF50;
+            background-color: #f8fff8;
+        }
+
+        .form-group input.invalid-input {
+            border-color: #F44336;
+            background-color: #fff8f8;
+        }
+
+        .validation-message {
+            position: absolute;
+            font-size: 12px;
+            margin-top: 4px;
+            transition: all 0.2s;
+        }
+
+        .validation-message.error {
+            color: #F44336;
+        }
+
+        .validation-message.success {
+            color: #4CAF50;
         }
 
         .auth-button {
@@ -325,6 +351,11 @@ function addModalStyles() {
 
         .auth-button:hover {
             background-color: #3367D6;
+        }
+
+        .auth-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
 
         .auth-button i {
@@ -402,6 +433,7 @@ function createAuthModal() {
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" placeholder="Enter your username">
+                    <div id="login-validation" class="validation-message"></div>
                 </div>
                 <button id="login-button" class="auth-button">
                     <i class="fa-solid fa-key"></i> Continue with Passkey
@@ -414,6 +446,7 @@ function createAuthModal() {
                 <div class="form-group">
                     <label for="register-username">Username</label>
                     <input type="text" id="register-username" placeholder="Choose a username">
+                    <div id="register-validation" class="validation-message"></div>
                 </div>
                 <button id="register-button" class="auth-button">
                     <i class="fa-solid fa-key"></i> Register with Passkey
@@ -455,26 +488,183 @@ function createAuthModal() {
         });
     });
 
+    // Setup username validation
+    setupUsernameValidation();
+
+    // Setup Enter key submission
+    setupEnterKeySubmission();
+
     // Attach WebAuthn handlers
     const loginButton = document.getElementById('login-button');
     loginButton.addEventListener('click', () => {
-        const username = document.getElementById('login-username').value;
-        if (!username) {
-            document.getElementById('login-status').textContent = 'Please enter a username';
-            return;
-        }
-        handleLogin(username);
+        attemptLogin();
     });
 
     const registerButton = document.getElementById('register-button');
     registerButton.addEventListener('click', () => {
-        const username = document.getElementById('register-username').value;
+        attemptRegistration();
+    });
+}
+
+// Setup real-time username validation
+function setupUsernameValidation() {
+    const loginUsernameInput = document.getElementById('login-username');
+    const registerUsernameInput = document.getElementById('register-username');
+    const loginButton = document.getElementById('login-button');
+    const registerButton = document.getElementById('register-button');
+
+    // Add debounce function to avoid too many requests
+    function debounce(func, delay) {
+        let debounceTimer;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        }
+    }
+
+    // Login username validation
+    loginUsernameInput.addEventListener('input', debounce(function() {
+        const username = this.value.trim();
+        const validationMsg = document.getElementById('login-validation');
+
+        // Clear validation if empty
         if (!username) {
-            document.getElementById('register-status').textContent = 'Please enter a username';
+            validationMsg.textContent = '';
+            this.classList.remove('valid-input', 'invalid-input');
+            loginButton.disabled = true;
             return;
         }
-        handleRegistration(username);
+
+        // Check if username exists
+        checkUsernameExists(username)
+            .then(exists => {
+                if (exists) {
+                    // Username exists, which is good for login
+                    validationMsg.textContent = 'Username verified';
+                    validationMsg.className = 'validation-message success';
+                    this.classList.add('valid-input');
+                    this.classList.remove('invalid-input');
+                    loginButton.disabled = false;
+                } else {
+                    // Username doesn't exist, can't login
+                    validationMsg.textContent = 'User does not exist';
+                    validationMsg.className = 'validation-message error';
+                    this.classList.add('invalid-input');
+                    this.classList.remove('valid-input');
+                    loginButton.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Username validation error:', error);
+                validationMsg.textContent = 'Error checking username';
+                validationMsg.className = 'validation-message error';
+                loginButton.disabled = true;
+            });
+    }, 300));
+
+    // Registration username validation
+    registerUsernameInput.addEventListener('input', debounce(function() {
+        const username = this.value.trim();
+        const validationMsg = document.getElementById('register-validation');
+
+        // Clear validation if empty
+        if (!username) {
+            validationMsg.textContent = '';
+            this.classList.remove('valid-input', 'invalid-input');
+            registerButton.disabled = true;
+            return;
+        }
+
+        // Check if username exists
+        checkUsernameExists(username)
+            .then(exists => {
+                if (exists) {
+                    // Username exists, which is bad for registration
+                    validationMsg.textContent = 'Username already taken';
+                    validationMsg.className = 'validation-message error';
+                    this.classList.add('invalid-input');
+                    this.classList.remove('valid-input');
+                    registerButton.disabled = true;
+                } else {
+                    // Username doesn't exist, can register
+                    validationMsg.textContent = 'Username available';
+                    validationMsg.className = 'validation-message success';
+                    this.classList.add('valid-input');
+                    this.classList.remove('invalid-input');
+                    registerButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Username validation error:', error);
+                validationMsg.textContent = 'Error checking username';
+                validationMsg.className = 'validation-message error';
+                registerButton.disabled = true;
+            });
+    }, 300));
+
+    // Initial state
+    loginButton.disabled = true;
+    registerButton.disabled = true;
+}
+
+// Setup Enter key submission for both forms
+function setupEnterKeySubmission() {
+    const loginUsernameInput = document.getElementById('login-username');
+    const registerUsernameInput = document.getElementById('register-username');
+
+    loginUsernameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            attemptLogin();
+        }
     });
+
+    registerUsernameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            attemptRegistration();
+        }
+    });
+}
+
+// Login helper function to reuse code
+function attemptLogin() {
+    const username = document.getElementById('login-username').value.trim();
+    const statusElement = document.getElementById('login-status');
+
+    if (!username) {
+        statusElement.textContent = 'Please enter a username';
+        statusElement.className = 'status-message error';
+        return;
+    }
+
+    // Clear previous status messages
+    statusElement.textContent = 'Authenticating...';
+    statusElement.className = 'status-message info';
+
+    // Call the login handler
+    handleLogin(username);
+}
+
+// Registration helper function to reuse code
+function attemptRegistration() {
+    const username = document.getElementById('register-username').value.trim();
+    const statusElement = document.getElementById('register-status');
+
+    if (!username) {
+        statusElement.textContent = 'Please enter a username';
+        statusElement.className = 'status-message error';
+        return;
+    }
+
+    // Clear previous status messages
+    statusElement.textContent = 'Setting up your passkey...';
+    statusElement.className = 'status-message info';
+
+    // Call the registration handler
+    handleRegistration(username);
 }
 
 // Function to show the authentication modal
@@ -482,6 +672,14 @@ export function showAuthModal() {
     const modal = document.getElementById('auth-modal');
     if (modal) {
         modal.style.display = 'block';
+        // Focus the username field in the active tab
+        const activeForm = modal.querySelector('.auth-form.active');
+        if (activeForm) {
+            const usernameInput = activeForm.querySelector('input[type="text"]');
+            if (usernameInput) {
+                usernameInput.focus();
+            }
+        }
     }
 }
 

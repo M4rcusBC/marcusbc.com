@@ -8,6 +8,23 @@ const expectedOrigin = process.env.NODE_ENV === 'production'
     ? 'https://marcusbc.com'
     : `http://localhost:${process.env.PORT}`;
 
+exports.checkUsernameExists = async (req, res) => {
+    try {
+        const { username } = req.body;
+        if (!username) {
+            return res.status(400).json({ error: 'Username is required' });
+        }
+
+        const user = await User.findOne({ where: { username } });
+
+        // Just return whether the user exists or not
+        return res.json({ exists: !!user });
+    } catch (err) {
+        console.error('checkUsernameExists error:', err);
+        return res.status(500).json({ error: 'Server error' });
+    }
+};
+
 // Registration initialization
 exports.requestRegistrationOptions = async (req, res) => {
     try {

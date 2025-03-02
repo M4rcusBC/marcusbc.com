@@ -10,4 +10,6 @@ router.post('/register/verify', webauthnController.verifyRegistration);
 router.post('/login/request', webauthnController.requestLoginOptions);
 router.post('/login/verify', webauthnController.verifyLogin);
 
+router.post('/check-username', webauthnController.checkUsernameExists);
+
 module.exports = router;

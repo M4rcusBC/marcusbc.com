@@ -181,3 +181,37 @@ function getCookie(name) {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
+
+/**
+ * Checks if a username exists in the system
+ * @param {string} username - The username to check
+ * @returns {Promise<boolean>} - Promise that resolves to true if username exists, false otherwise
+ */
+export async function checkUsernameExists(username) {
+    if (!username || username.trim() === '') {
+        return false;
+    }
+
+    try {
+        const response = await fetch('/webauthn/check-username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username.trim() }),
+        });
+
+        if (!response.ok) {
+            console.error('Error checking username:', response.statusText);
+            // If there's a server error, we'll return false to be safe
+            return false;
+        }
+
+        const data = await response.json();
+        return data.exists;
+    } catch (error) {
+        console.error('Error checking if username exists:', error);
+        // If there's an error, we'll return false to be safe
+        return false;
+    }
+}
