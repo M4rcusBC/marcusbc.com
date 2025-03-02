@@ -2,6 +2,12 @@ const { generateRegistrationOptions, verifyRegistrationResponse } = require('@si
 const { generateAuthenticationOptions, verifyAuthenticationResponse } = require('@simplewebauthn/server');
 const User = require('../models/User');
 
+// Domain configuration
+const rpID = process.env.NODE_ENV === 'production' ? 'marcusbc.com' : 'localhost';
+const expectedOrigin = process.env.NODE_ENV === 'production'
+    ? 'https://marcusbc.com'
+    : 'http://localhost:3000';
+
 // Registration initialization
 exports.requestRegistrationOptions = async (req, res) => {
     try {
@@ -14,12 +20,18 @@ exports.requestRegistrationOptions = async (req, res) => {
         let user = await User.findOne({ where: { username } });
         if (!user) {
             user = await User.create({ username });
-            // No need to specify ID - it will be auto-incremented
         }
 
         const options = await generateRegistrationOptions({
             rpName: 'marcusbc.com',
+            rpID: rpID,
+            userID: user.id.toString(),
             userName: user.username,
+            attestationType: 'none',
+            authenticatorSelection: {
+                residentKey: 'preferred',
+                userVerification: 'preferred'
+            }
         });
 
         // Store challenge in DB
@@ -49,23 +61,27 @@ exports.verifyRegistration = async (req, res) => {
         const verification = await verifyRegistrationResponse({
             response: attResp,
             expectedChallenge: user.currentChallenge,
-            expectedOrigin: 'http://localhost:3000', // Adjust for production
-            expectedRPID: 'localhost',             // Adjust for production
+            expectedOrigin: expectedOrigin,
+            expectedRPID: rpID,
         });
 
         if (!verification.verified) {
             return res.status(400).json({ error: 'Registration verification failed' });
         }
 
-        // If verified, store credentialPublicKey
-        user.credentialPublicKey = verification.registrationInfo.credentialPublicKey;
+        // Store verification data
+        const { credentialID, credentialPublicKey } = verification.registrationInfo;
+
+        user.credentialID = Buffer.from(credentialID);
+        user.credentialPublicKey = Buffer.from(credentialPublicKey);
+        user.credentialCounter = 0;
         user.currentChallenge = null;
         await user.save();
 
         return res.json({ success: true, message: 'Registration verified' });
     } catch (err) {
         console.error('verifyRegistration error:', err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: `Server error: ${err.message}` });
     }
 };
 
@@ -78,17 +94,20 @@ exports.requestLoginOptions = async (req, res) => {
         }
 
         const user = await User.findOne({ where: { username } });
-        if (!user || !user.credentialPublicKey) {
+        if (!user || !user.credentialID) {
             return res.status(404).json({ error: 'User or credential not found' });
         }
 
         const options = generateAuthenticationOptions({
             allowCredentials: [
                 {
-                    id: user.credentialPublicKey, // This is your credential ID in a real scenario
+                    id: user.credentialID,
                     type: 'public-key',
                 },
             ],
+            userVerification: 'preferred',
+            rpID: rpID,
+            timeout: 60000,
         });
 
         user.currentChallenge = options.challenge;
@@ -117,11 +136,12 @@ exports.verifyLogin = async (req, res) => {
         const verification = await verifyAuthenticationResponse({
             response: authResp,
             expectedChallenge: user.currentChallenge,
-            expectedOrigin: 'http://localhost:3000',
-            expectedRPID: 'localhost',
+            expectedOrigin: expectedOrigin,
+            expectedRPID: rpID,
             authenticator: {
                 credentialPublicKey: user.credentialPublicKey,
-                counter: 0, // In production, track the real counter to avoid replay attacks
+                credentialID: user.credentialID,
+                counter: user.credentialCounter,
             },
         });
 
@@ -129,18 +149,29 @@ exports.verifyLogin = async (req, res) => {
             return res.status(400).json({ error: 'Login verification failed' });
         }
 
-        // Clear challenge
+        // Update the counter to prevent replay attacks
+        user.credentialCounter = verification.authenticationInfo.newCounter;
         user.currentChallenge = null;
         await user.save();
+
+        // Generate session token
+        const sessionToken = generateRandomToken();
 
         return res.json({
             success: true,
             message: 'Login successful',
             userId: user.id,
-            username: user.username
+            username: user.username,
+            sessionToken: sessionToken // Send the token to the client
         });
     } catch (err) {
         console.error('verifyLogin error:', err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: `Server error: ${err.message}` });
     }
 };
+
+// Helper function to generate a session token
+function generateRandomToken() {
+    return Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+}

@@ -15,7 +15,7 @@ export async function handleRegistration(username) {
         statusElement.className = 'status-message info';
 
         // 1. Request registration options from the server
-        const resp = await fetch('/webauthn/register/request', {  // <-- Fixed endpoint path
+        const resp = await fetch('/webauthn/register/request', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -30,6 +30,14 @@ export async function handleRegistration(username) {
 
         // 2. Get options from server response
         const options = await resp.json();
+
+        // Ensure options are properly decoded for browser WebAuthn API
+        if (options.user && options.user.id) {
+            options.user.id = base64URLStringToBuffer(options.user.id);
+        }
+        if (options.challenge) {
+            options.challenge = base64URLStringToBuffer(options.challenge);
+        }
 
         // 3. Start the WebAuthn registration process in the browser
         statusElement.textContent = 'Please follow your device prompts to create passkey...';
@@ -83,7 +91,7 @@ export async function handleLogin(username) {
         statusElement.className = 'status-message info';
 
         // 1. Request authentication options from the server
-        const resp = await fetch('/webauthn/login/request', {  // <-- Fixed endpoint path
+        const resp = await fetch('/webauthn/login/request', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -98,6 +106,21 @@ export async function handleLogin(username) {
 
         // 2. Get options from server response
         const options = await resp.json();
+
+        // Ensure challenge is properly decoded
+        if (options.challenge) {
+            options.challenge = base64URLStringToBuffer(options.challenge);
+        }
+
+        // Ensure allowCredentials IDs are properly decoded
+        if (options.allowCredentials && Array.isArray(options.allowCredentials)) {
+            options.allowCredentials = options.allowCredentials.map(credential => {
+                return {
+                    ...credential,
+                    id: base64URLStringToBuffer(credential.id)
+                };
+            });
+        }
 
         // 3. Start the WebAuthn authentication process in the browser
         statusElement.textContent = 'Please follow your device prompts to verify your passkey...';
@@ -128,7 +151,7 @@ export async function handleLogin(username) {
         statusElement.className = 'status-message success';
 
         // Store authentication session information
-        setSessionCookies(username, result.sessionToken || generateSessionToken());
+        setSessionCookies(username, result.sessionToken);
 
         // Refresh the page to update UI
         setTimeout(() => {
@@ -142,7 +165,23 @@ export async function handleLogin(username) {
     }
 }
 
-// Rest of the functions remain the same
+// Helper function to convert base64url string to ArrayBuffer
+function base64URLStringToBuffer(base64URLString) {
+    // Convert from Base64URL to Base64
+    const base64 = base64URLString.replace(/-/g, '+').replace(/_/g, '/');
+    // Pad with '='
+    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    // Convert to ArrayBuffer
+    const binary = atob(padded);
+    const buffer = new ArrayBuffer(binary.length);
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return buffer;
+}
+
+// Session management functions
 export function handleLogout() {
     clearSessionCookies();
 }
@@ -161,11 +200,6 @@ function setSessionCookies(username, sessionToken) {
 function clearSessionCookies() {
     document.cookie = `${SESSION_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
     document.cookie = `${USERNAME_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
-}
-
-function generateSessionToken() {
-    return Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
 }
 
 function getCookie(name) {

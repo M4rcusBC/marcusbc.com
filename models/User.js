@@ -13,11 +13,18 @@ const User = sequelize.define('User', {
         unique: true,
         allowNull: false
     },
-    // Store an array of credentials in your production setup;
-    // for simplicity, we'll keep just one credentialPublicKey here.
+    credentialID: {
+        type: DataTypes.BLOB,
+        allowNull: true,
+    },
     credentialPublicKey: {
         type: DataTypes.BLOB,
         allowNull: true,
+    },
+    credentialCounter: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0
     },
     currentChallenge: {
         type: DataTypes.STRING,
