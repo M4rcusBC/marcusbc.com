@@ -25,7 +25,6 @@ exports.requestRegistrationOptions = async (req, res) => {
         const options = await generateRegistrationOptions({
             rpName: 'marcusbc.com',
             rpID: rpID,
-            userID: user.id.toString(),
             userName: user.username,
             attestationType: 'none',
             authenticatorSelection: {
