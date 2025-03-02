@@ -3,8 +3,6 @@ const session = require('express-session');
 const passport = require('passport');
 // Keep these imports for later when you restore OAuth
 const mongoose = require('mongoose');
-const AppleStrategy = require('passport-apple');
-const GitHubStrategy = require('passport-github2').Strategy;
 const config = require('./config/config');
 
 // Create a simple memory store for users during debugging
@@ -36,23 +34,38 @@ passport.deserializeUser((id, done) => {
     done(null, memoryUsers[id]);
 });
 
-// Temporary local authentication for debugging
-app.post('/api/auth/login', (req, res) => {
-    const { username } = req.body;
-
-    // Create a temporary user
+app.post('/api/auth/login/email', (req, res) => {
+    const { email } = req.body;
     const userId = Date.now().toString();
     const user = {
         id: userId,
-        name: username || 'Debug User'
+        name: email || 'Email User'
     };
 
     memoryUsers[userId] = user;
 
-    // Log the user in
     req.login(user, (err) => {
         if (err) {
-            console.error('Login error:', err);
+            console.error('Email login error:', err);
+            return res.status(500).send('Login failed');
+        }
+        return res.redirect('/protected');
+    });
+});
+
+app.post('/api/auth/login/phone', (req, res) => {
+    const { phone } = req.body;
+    const userId = Date.now().toString();
+    const user = {
+        id: userId,
+        name: phone || 'Phone User'
+    };
+
+    memoryUsers[userId] = user;
+
+    req.login(user, (err) => {
+        if (err) {
+            console.error('Phone login error:', err);
             return res.status(500).send('Login failed');
         }
         return res.redirect('/protected');

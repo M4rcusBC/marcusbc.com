@@ -46,7 +46,9 @@ router.post(
 router.post(
     '/login/phone',
     [
-        body('phoneNumber').isMobilePhone().withMessage('Please enter a valid phone number')
+        body('phoneNumber').isMobilePhone(
+            ['en-US', 'en-CA', 'en-GB', 'en-AU', 'en-IN']
+        ).withMessage('Please enter a valid phone number')
     ],
     authController.loginPhone
 );
