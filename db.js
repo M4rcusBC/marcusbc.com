@@ -1,10 +1,11 @@
 const { Sequelize } = require('sequelize');
+const config = require('./config/config');
 
-// Adjust these credentials for your environment
-const sequelize = new Sequelize('my_db_name', 'my_user', 'my_password', {
-    host: 'localhost',
-    dialect: 'mysql',
-    logging: false, // true for debugging
-});
+const sequelize = new Sequelize(
+    config.db.database,
+    config.db.username,
+    config.db.password,
+    config.db.options
+);
 
 module.exports = sequelize;

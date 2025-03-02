@@ -23,7 +23,7 @@ exports.requestRegistrationOptions = async (req, res) => {
         });
 
         // Store challenge in DB
-        user.currentChallenge = options.challenge;
+        user.currentChallenge = (await options).challenge;
         await user.save();
 
         return res.json(options);
