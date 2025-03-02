@@ -32,13 +32,10 @@ export async function handleRegistration(username) {
         const options = await resp.json();
         console.log('Received registration options:', options);
 
-        // No need to manually convert, the library handles base64url strings now
-        // Just pass the options directly to startRegistration
-
         // 3. Start the WebAuthn registration process in the browser
         statusElement.textContent = 'Please follow your device prompts to create passkey...';
         const attResp = await startRegistration(options);
-        console.log('Registration response:', attResp);
+        console.log('Registration response from browser:', attResp);
 
         // 4. Send the response to the server for verification
         statusElement.textContent = 'Verifying registration...';
@@ -105,12 +102,19 @@ export async function handleLogin(username) {
         const options = await resp.json();
         console.log('Received authentication options:', options);
 
-        // No need for manual conversion, the library handles base64url strings
+        // Check if we received valid options
+        if (!options || Object.keys(options).length === 0) {
+            throw new Error('Received empty authentication options from server');
+        }
+
+        if (!options.challenge) {
+            throw new Error('Authentication options missing challenge');
+        }
 
         // 3. Start the WebAuthn authentication process in the browser
         statusElement.textContent = 'Please follow your device prompts to verify your passkey...';
         const authResp = await startAuthentication(options);
-        console.log('Authentication response:', authResp);
+        console.log('Authentication response from browser:', authResp);
 
         // 4. Send the response to the server for verification
         statusElement.textContent = 'Verifying login...';

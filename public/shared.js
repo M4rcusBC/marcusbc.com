@@ -33,12 +33,27 @@ export function loadNav() {
 
     // Login link - changes based on auth state
     const loginLi = document.createElement("li");
+    loginLi.style.position = "relative"; // Add position relative for the dropdown
+
     if (isUserLoggedIn()) {
         // User is logged in, show username
         const username = getCookie("username");
         loginLi.textContent = username || "account";
+        loginLi.className = "user-account"; // Add class for styling
+
+        // Make it look clickable
+        loginLi.style.cursor = "pointer";
+
+        // Add an indicator that this is a dropdown
+        const indicator = document.createElement("span");
+        indicator.innerHTML = " ▼"; // Down arrow
+        indicator.style.fontSize = "0.8em";
+        indicator.style.opacity = "0.7";
+        loginLi.appendChild(indicator);
+
         loginLi.addEventListener("click", (e) => {
             e.stopPropagation();
+            console.log("Account clicked - toggle dropdown");
 
             // Show a dropdown with logout option
             const existingDropdown = document.getElementById('user-dropdown');
@@ -51,12 +66,37 @@ export function loadNav() {
             dropdown.id = 'user-dropdown';
             dropdown.className = 'user-dropdown';
 
+            // Fix positioning
+            dropdown.style.position = "absolute";
+            dropdown.style.top = "100%";
+            dropdown.style.right = "0";
+            dropdown.style.minWidth = "120px";
+            dropdown.style.backgroundColor = "white";
+            dropdown.style.border = "1px solid #ddd";
+            dropdown.style.borderRadius = "5px";
+            dropdown.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
+            dropdown.style.zIndex = "1000"; // Ensure high z-index
+
             const logoutOption = document.createElement('div');
             logoutOption.className = 'dropdown-option';
             logoutOption.textContent = 'Logout';
-            logoutOption.addEventListener('click', () => {
+            logoutOption.style.padding = "10px 15px";
+            logoutOption.style.cursor = "pointer";
+
+            logoutOption.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                console.log("Logout option clicked");
                 handleLogout();
                 window.location.reload();
+            });
+
+            // Hover effect
+            logoutOption.addEventListener('mouseover', () => {
+                logoutOption.style.backgroundColor = "#f5f5f5";
+            });
+
+            logoutOption.addEventListener('mouseout', () => {
+                logoutOption.style.backgroundColor = "transparent";
             });
 
             dropdown.appendChild(logoutOption);
