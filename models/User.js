@@ -1,63 +1,28 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
 
-const UserSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        sparse: true,
-        trim: true,
-        lowercase: true
+// “User” model for storing user data
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
     },
-    phoneNumber: {
-        type: String,
-        sparse: true,
-        trim: true
+    username: {
+        type: DataTypes.STRING,
+        unique: true,
     },
-    password: {
-        type: String
+    // Store an array of credentials in your production setup;
+    // for simplicity, we'll keep just one credentialPublicKey here.
+    credentialPublicKey: {
+        type: DataTypes.BLOB,
+        allowNull: true,
     },
-    name: String,
-    isEmailVerified: {
-        type: Boolean,
-        default: false
+    currentChallenge: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
-    isPhoneVerified: {
-        type: Boolean,
-        default: false
-    },
-    verificationTokens: {
-        email: {
-            token: String,
-            expires: Date
-        },
-        phone: {
-            token: String,
-            expires: Date
-        }
-    },
-    // For OAuth integrations
-    oauthProfiles: [{
-        provider: String, // 'github', 'apple', 'azure'
-        id: String,
-        data: Object
-    }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+}, {
+    tableName: 'users',
 });
 
-// Hash password before saving
-UserSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
-    next();
-});
-
-// Method to check password
-UserSchema.methods.comparePassword = async function(candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;
