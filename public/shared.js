@@ -554,35 +554,43 @@ function renderTurnstile(formType = 'login') {
         // Clear the container
         container.innerHTML = '';
 
-        // Render the Turnstile widget
+        // Render the Turnstile widget with explicit size and appearance settings
         window.turnstile.render(`#${containerId}`, {
             sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
+            theme: 'light',
+            size: 'normal',
             callback: function(token) {
-                // Store the token in a hidden input or data attribute
-                const formId = `${formType}-form`;
-                const form = document.getElementById(formId);
+                console.log(`Turnstile token received for ${formType}: ${token.substring(0, 15)}...`);
 
-                // Remove any existing token input
-                const existingToken = form.querySelector('input[name="cf-turnstile-response"]');
-                if (existingToken) {
-                    existingToken.remove();
+                // Store the token directly on the form and as a data attribute
+                const form = document.getElementById(`${formType}-form`);
+
+                // Create/update hidden input for form submission
+                let tokenInput = form.querySelector('input[name="turnstile-token"]');
+                if (!tokenInput) {
+                    tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = 'turnstile-token';
+                    form.appendChild(tokenInput);
                 }
-
-                // Add the new token
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = 'cf-turnstile-response';
                 tokenInput.value = token;
-                form.appendChild(tokenInput);
+
+                // Also store as data attribute as backup
+                form.dataset.turnstileToken = token;
 
                 // Enable the submit button if username is valid
                 const button = document.getElementById(`${formType}-button`);
                 const usernameInput = document.getElementById(`${formType}-username`);
                 const isValidUsername = usernameInput.classList.contains('valid-input');
 
-                if (button.disabled && isValidUsername) {
+                if (isValidUsername) {
                     button.disabled = false;
                 }
+            },
+            'error-callback': function() {
+                console.error(`Turnstile encountered an error on ${formType} form`);
+                const button = document.getElementById(`${formType}-button`);
+                button.disabled = true;
             }
         });
     }
@@ -723,8 +731,17 @@ function attemptLogin() {
     const statusElement = document.getElementById('login-status');
     const form = document.getElementById('login-form');
 
-    // Get the turnstile response
-    const turnstileResponse = form.querySelector('input[name="cf-turnstile-response"]')?.value;
+    // Get the turnstile token with fallbacks
+    let turnstileToken = null;
+    const tokenInput = form.querySelector('input[name="turnstile-token"]');
+
+    if (tokenInput && tokenInput.value) {
+        turnstileToken = tokenInput.value;
+    } else if (form.dataset.turnstileToken) {
+        turnstileToken = form.dataset.turnstileToken;
+    }
+
+    console.log("Login - Turnstile token available:", !!turnstileToken);
 
     if (!username) {
         statusElement.textContent = 'Please enter a username';
@@ -732,9 +749,14 @@ function attemptLogin() {
         return;
     }
 
-    if (!turnstileResponse) {
+    if (!turnstileToken) {
         statusElement.textContent = 'Please complete the security challenge';
         statusElement.className = 'status-message error';
+
+        // Reset the Turnstile widget to give user another chance
+        if (window.turnstile) {
+            window.turnstile.reset('#login-turnstile');
+        }
         return;
     }
 
@@ -743,7 +765,7 @@ function attemptLogin() {
     statusElement.className = 'status-message info';
 
     // Call the login handler with the turnstile token
-    handleLogin(username, turnstileResponse);
+    handleLogin(username, turnstileToken);
 }
 
 // Registration helper function to reuse code
@@ -752,8 +774,17 @@ function attemptRegistration() {
     const statusElement = document.getElementById('register-status');
     const form = document.getElementById('register-form');
 
-    // Get the turnstile response
-    const turnstileResponse = form.querySelector('input[name="cf-turnstile-response"]')?.value;
+    // Get the turnstile token with fallbacks
+    let turnstileToken = null;
+    const tokenInput = form.querySelector('input[name="turnstile-token"]');
+
+    if (tokenInput && tokenInput.value) {
+        turnstileToken = tokenInput.value;
+    } else if (form.dataset.turnstileToken) {
+        turnstileToken = form.dataset.turnstileToken;
+    }
+
+    console.log("Registration - Turnstile token available:", !!turnstileToken);
 
     if (!username) {
         statusElement.textContent = 'Please enter a username';
@@ -761,9 +792,14 @@ function attemptRegistration() {
         return;
     }
 
-    if (!turnstileResponse) {
+    if (!turnstileToken) {
         statusElement.textContent = 'Please complete the security challenge';
         statusElement.className = 'status-message error';
+
+        // Reset the Turnstile widget to give user another chance
+        if (window.turnstile) {
+            window.turnstile.reset('#register-turnstile');
+        }
         return;
     }
 
@@ -772,7 +808,7 @@ function attemptRegistration() {
     statusElement.className = 'status-message info';
 
     // Call the registration handler with the turnstile token
-    handleRegistration(username, turnstileResponse);
+    handleRegistration(username, turnstileToken);
 }
 
 // Function to show the authentication modal

@@ -15,7 +15,14 @@ const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/sit
 
 // Helper function to verify Turnstile tokens
 async function verifyTurnstileToken(token, ip) {
+    if (!token) {
+        console.error('No Turnstile token provided for verification');
+        return { success: false, error: 'Missing token' };
+    }
+
     try {
+        console.log(`Verifying Turnstile token: ${token.substring(0, 15)}...`);
+
         // Create form data for the verification request
         const formData = new URLSearchParams();
         formData.append('secret', TURNSTILE_SECRET_KEY);
@@ -33,16 +40,30 @@ async function verifyTurnstileToken(token, ip) {
             },
         });
 
-        // Check the verification result
+        // Log complete response for debugging
+        console.log('Turnstile API response:', response.data);
+
+        // If verification failed, log detailed information
+        if (!response.data.success) {
+            console.error('Turnstile verification failed:', {
+                'error-codes': response.data['error-codes'],
+                hostname: response.data.hostname,
+                action: response.data.action
+            });
+        }
+
         return {
             success: response.data.success === true,
-            error: response.data.error || null,
+            error: response.data['error-codes'] ? response.data['error-codes'].join(', ') : null,
             hostname: response.data.hostname || null,
             challenge_ts: response.data.challenge_ts || null,
         };
     } catch (error) {
-        console.error('Turnstile verification error:', error);
-        return { success: false, error: 'Verification request failed' };
+        console.error('Turnstile verification error:', error.message);
+        return {
+            success: false,
+            error: 'Verification request failed: ' + (error.message || 'Unknown error')
+        };
     }
 }
 

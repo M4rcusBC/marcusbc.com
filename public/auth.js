@@ -7,12 +7,15 @@ const USERNAME_COOKIE_NAME = 'username';
 const SESSION_DURATION_DAYS = 7; // Cookie expiration time
 
 // Handle WebAuthn registration
+// Update the handleRegistration function to log more details
 export async function handleRegistration(username, turnstileToken) {
     const statusElement = document.getElementById('register-status');
 
     try {
         statusElement.textContent = 'Starting registration...';
         statusElement.className = 'status-message info';
+
+        console.log('Starting registration with turnstile token:', turnstileToken ? `${turnstileToken.substring(0, 15)}...` : 'missing');
 
         // 1. Request registration options from the server
         const resp = await fetch('/webauthn/register/request', {
@@ -42,6 +45,8 @@ export async function handleRegistration(username, turnstileToken) {
 
         // 4. Send the response to the server for verification
         statusElement.textContent = 'Verifying registration...';
+        console.log('Sending verification with token:', turnstileToken ? `${turnstileToken.substring(0, 15)}...` : 'missing');
+
         const verificationResp = await fetch('/webauthn/register/verify', {
             method: 'POST',
             headers: {
@@ -54,9 +59,20 @@ export async function handleRegistration(username, turnstileToken) {
             }),
         });
 
+        // Log the full verification response for debugging
+        const responseText = await verificationResp.text();
+        console.log('Server verification response:', responseText);
+
+        // Parse JSON response if possible
+        let responseData;
+        try {
+            responseData = JSON.parse(responseText);
+        } catch(e) {
+            throw new Error(`Invalid server response: ${responseText}`);
+        }
+
         if (!verificationResp.ok) {
-            const error = await verificationResp.json();
-            throw new Error(error.error || 'Registration verification failed');
+            throw new Error(responseData.error || 'Registration verification failed');
         }
 
         // 5. Registration successful!
