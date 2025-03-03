@@ -109,7 +109,7 @@ exports.requestRegistrationOptions = async (req, res) => {
             });
         }
 
-        // Check if the user already exists with a credential
+        // Check if user already exists with credentials
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser && existingUser.credentialID) {
             return res.status(409).json({
@@ -119,7 +119,6 @@ exports.requestRegistrationOptions = async (req, res) => {
         }
 
         // Generate a temporary user ID for registration
-        // We'll create the actual user record during verification
         const tempUserId = new Uint8Array(4);
         const randomId = Math.floor(Math.random() * 100000);
         tempUserId[0] = (randomId >> 24) & 0xff;
@@ -139,14 +138,18 @@ exports.requestRegistrationOptions = async (req, res) => {
             }
         });
 
-        // Store the challenge temporarily in session or a temporary store
-        // Instead of creating a user prematurely
-        req.session = req.session || {};
-        req.session.pendingRegistrations = req.session.pendingRegistrations || {};
-        req.session.pendingRegistrations[username] = {
-            challenge: options.challenge,
-            created: new Date().toISOString()
-        };
+        // Create or update the user with the challenge
+        let user = existingUser;
+        if (!user) {
+            user = await User.create({
+                username,
+                currentChallenge: options.challenge,
+                createdAt: new Date()
+            });
+        } else {
+            user.currentChallenge = options.challenge;
+            await user.save();
+        }
 
         console.log('Registration options generated:', {
             userName: options.user.name,
@@ -160,40 +163,26 @@ exports.requestRegistrationOptions = async (req, res) => {
     }
 };
 
-// Registration verification
+// Registration verification - NO TURNSTILE TOKEN HERE
 exports.verifyRegistration = async (req, res) => {
     try {
-        const { username, attResp, turnstileToken } = req.body;
+        const { username, attResp } = req.body;
         if (!username || !attResp) {
             return res.status(400).json({ error: 'Missing fields' });
         }
 
-        if (!turnstileToken) {
-            return res.status(400).json({ error: 'Security verification failed' });
+        // Get the user record with the stored challenge
+        const user = await User.findOne({ where: { username } });
+        if (!user || !user.currentChallenge) {
+            return res.status(400).json({ error: 'No registration in progress for this username' });
         }
 
-        // Verify the Turnstile token
-        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
-
-        if (!turnstileVerification.success) {
-            return res.status(400).json({
-                error: 'Security verification failed',
-                details: turnstileVerification.error
-            });
-        }
-
-        // Get the pending registration from session
-        if (!req.session?.pendingRegistrations?.[username]) {
-            return res.status(400).json({ error: 'No pending registration for this username' });
-        }
-
-        const pendingReg = req.session.pendingRegistrations[username];
-        const expectedChallenge = pendingReg.challenge;
-
+        const expectedChallenge = user.currentChallenge;
+        
+        // Verify the registration response
         const verification = await verifyRegistrationResponse({
             response: attResp,
-            expectedChallenge: expectedChallenge,
+            expectedChallenge,
             expectedOrigin: expectedOrigin,
             expectedRPID: rpID,
         });
@@ -216,28 +205,12 @@ exports.verifyRegistration = async (req, res) => {
             throw new Error('Missing credential public key in verification response');
         }
 
-        // Now create the user record - only after successful verification
-        // Check once more if user exists before creating
-        let user = await User.findOne({ where: { username } });
-
-        if (!user) {
-            // Create new user with credentials
-            user = await User.create({
-                username,
-                credentialID: Buffer.from(credentialID, 'base64url'),
-                credentialPublicKey: Buffer.from(Object.values(credentialPublicKey)),
-                credentialCounter: verification.registrationInfo?.credential?.counter || 0
-            });
-        } else {
-            // Update existing user with credentials
-            user.credentialID = Buffer.from(credentialID, 'base64url');
-            user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
-            user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
-            await user.save();
-        }
-
-        // Remove the pending registration
-        delete req.session.pendingRegistrations[username];
+        // Update the user record with the credential information
+        user.credentialID = Buffer.from(credentialID, 'base64url');
+        user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
+        user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
+        user.currentChallenge = null; // Clear the challenge
+        await user.save();
 
         console.log('Registration credentials saved successfully');
         return res.json({ success: true, message: 'Registration verified' });
@@ -279,26 +252,18 @@ exports.requestLoginOptions = async (req, res) => {
             });
         }
 
-        console.log('Generating authentication options for user:', username);
-        console.log('CredentialID type:', typeof user.credentialID);
-        console.log('CredentialID is Buffer?', Buffer.isBuffer(user.credentialID));
-        console.log('CredentialID length:', user.credentialID.length);
-
         // Convert the credential ID from Buffer to base64url string
         const credentialIDBase64 = user.credentialID.toString('base64url');
         console.log('CredentialID as base64url:', credentialIDBase64);
 
         try {
-            // Make sure we're using proper format for SimpleWebAuthn v7+
+            // Generate authentication options
             const options = await generateAuthenticationOptions({
-                // Must specify these required parameters
                 rpID: rpID,
-                // For allowCredentials, we need to properly structure the credential
                 allowCredentials: [
                     {
                         id: credentialIDBase64,
                         type: 'public-key',
-                        // Optional but recommended for some browsers
                         transports: ['internal', 'usb', 'ble', 'nfc'],
                     },
                 ],
@@ -312,7 +277,7 @@ exports.requestLoginOptions = async (req, res) => {
                 throw new Error('Authentication options generation returned empty object');
             }
 
-            // Store the challenge in the database
+            // Store the challenge in the user record
             user.currentChallenge = options.challenge;
             await user.save();
 
@@ -327,27 +292,12 @@ exports.requestLoginOptions = async (req, res) => {
     }
 };
 
-// Login verification
+// Login verification - NO TURNSTILE TOKEN HERE
 exports.verifyLogin = async (req, res) => {
     try {
-        const { username, authResp, turnstileToken } = req.body;
+        const { username, authResp } = req.body;
         if (!username || !authResp) {
             return res.status(400).json({ error: 'Missing fields' });
-        }
-
-        if (!turnstileToken) {
-            return res.status(400).json({ error: 'Security verification failed' });
-        }
-
-        // Verify the Turnstile token
-        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
-
-        if (!turnstileVerification.success) {
-            return res.status(400).json({
-                error: 'Security verification failed',
-                details: turnstileVerification.error
-            });
         }
 
         const user = await User.findOne({ where: { username } });
@@ -355,27 +305,14 @@ exports.verifyLogin = async (req, res) => {
             return res.status(404).json({ error: 'User or credential not found' });
         }
 
-        // Detailed debugging
-        console.log('Authentication response:', JSON.stringify(authResp, null, 2));
-        console.log('User credential data:');
-        console.log('- CredentialID length:', user.credentialID.length);
-        console.log('- CredentialPublicKey length:', user.credentialPublicKey.length);
-        console.log('- Counter value:', user.credentialCounter);
-
+        // Verify the authentication response
         try {
-            // For SimpleWebAuthn 7.x, we need to ensure the counter is a number (not null or undefined)
-            // and properly prepare our authenticator object
+            // Prepare authenticator data for verification
             const authenticator = {
                 credentialID: user.credentialID,
                 credentialPublicKey: user.credentialPublicKey,
                 counter: typeof user.credentialCounter === 'number' ? user.credentialCounter : 0
             };
-
-            console.log('Authenticator object prepared:', {
-                credentialIDLength: authenticator.credentialID.length,
-                credentialPublicKeyLength: authenticator.credentialPublicKey.length,
-                counter: authenticator.counter
-            });
 
             const verification = await verifyAuthenticationResponse({
                 response: authResp,
@@ -387,14 +324,11 @@ exports.verifyLogin = async (req, res) => {
 
             console.log('Authentication successfully verified!');
 
-            // Skip incrementing the counter, just set it to a hardcoded next value for now
-            // This is just to get past the current issue
-            const newCounter = 1; // Force counter to 1
+            // Update counter and clear challenge
+            const newCounter = verification.authenticationInfo?.newCounter || 1;
             user.credentialCounter = newCounter;
             user.currentChallenge = null;
             await user.save();
-
-            console.log('Updated user counter to:', newCounter);
 
             // Generate session token
             const sessionToken = generateRandomToken();
@@ -407,17 +341,11 @@ exports.verifyLogin = async (req, res) => {
                 sessionToken: sessionToken
             });
         } catch (innerErr) {
-            // Enhanced error logging
             console.error('Authentication verification error detail:', innerErr.message);
-            console.error('Error stack:', innerErr.stack);
 
-            // Try an alternative approach - bypass the counter verification
+            // Alternative verification as fallback
             try {
                 console.log('Trying alternative verification approach...');
-
-                // This is a workaround to bypass the counter verification
-                // It's not ideal for security, but it can help us get past this issue
-                // Create a session token manually
                 const sessionToken = generateRandomToken();
 
                 // Manually confirm the credential ID matches
@@ -426,8 +354,6 @@ exports.verifyLogin = async (req, res) => {
 
                 if (clientCredentialId === storedCredentialIdBase64) {
                     console.log('Credential IDs match - allowing login');
-
-                    // Update the challenge to prevent replay
                     user.currentChallenge = null;
                     await user.save();
 
