@@ -370,7 +370,7 @@ function addModalStyles() {
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 20px;
+            margin-top: 0.5em;
         }
 
         .auth-button:hover {
@@ -432,7 +432,7 @@ function addModalStyles() {
         
         /* Turnstile container styles */
         .turnstile-container {
-            margin: 15px 0;
+            margin: 2em 0 1em 0;
             display: flex;
             justify-content: center;
         }
@@ -733,7 +733,7 @@ function attemptLogin() {
     }
 
     if (!turnstileResponse) {
-        statusElement.textContent = 'Please complete the security check';
+        statusElement.textContent = 'Please complete the security challenge';
         statusElement.className = 'status-message error';
         return;
     }
@@ -762,7 +762,7 @@ function attemptRegistration() {
     }
 
     if (!turnstileResponse) {
-        statusElement.textContent = 'Please complete the security check';
+        statusElement.textContent = 'Please complete the security challenge';
         statusElement.className = 'status-message error';
         return;
     }
