@@ -556,7 +556,7 @@ function renderTurnstile(formType = 'login') {
 
         // Render the Turnstile widget
         window.turnstile.render(`#${containerId}`, {
-            sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3', // Replace with your actual sitekey
+            sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
             callback: function(token) {
                 // Store the token in a hidden input or data attribute
                 const formId = `${formType}-form`;
