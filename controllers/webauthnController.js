@@ -1,12 +1,50 @@
 const { generateRegistrationOptions, verifyRegistrationResponse } = require('@simplewebauthn/server');
 const { generateAuthenticationOptions, verifyAuthenticationResponse } = require('@simplewebauthn/server');
 const User = require('../models/User');
+const axios = require('axios');
 
 // Domain configuration
 const rpID = process.env.NODE_ENV === 'production' ? 'marcusbc.com' : 'localhost';
 const expectedOrigin = process.env.NODE_ENV === 'production'
     ? 'https://marcusbc.com'
     : `http://localhost:${process.env.PORT}`;
+
+// Cloudflare Turnstile configuration
+const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
+const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+// Helper function to verify Turnstile tokens
+async function verifyTurnstileToken(token, ip) {
+    try {
+        // Create form data for the verification request
+        const formData = new URLSearchParams();
+        formData.append('secret', TURNSTILE_SECRET_KEY);
+        formData.append('response', token);
+
+        // Include IP address if available
+        if (ip) {
+            formData.append('remoteip', ip);
+        }
+
+        // Make the verification request
+        const response = await axios.post(TURNSTILE_VERIFY_URL, formData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+
+        // Check the verification result
+        return {
+            success: response.data.success === true,
+            error: response.data.error || null,
+            hostname: response.data.hostname || null,
+            challenge_ts: response.data.challenge_ts || null,
+        };
+    } catch (error) {
+        console.error('Turnstile verification error:', error);
+        return { success: false, error: 'Verification request failed' };
+    }
+}
 
 // Check if username exists without creating a user
 exports.checkUsernameExists = async (req, res) => {
@@ -29,9 +67,25 @@ exports.checkUsernameExists = async (req, res) => {
 // Registration initialization
 exports.requestRegistrationOptions = async (req, res) => {
     try {
-        const { username } = req.body;
+        const { username, turnstileToken } = req.body;
+
         if (!username) {
             return res.status(400).json({ error: 'Username is required' });
+        }
+
+        if (!turnstileToken) {
+            return res.status(400).json({ error: 'Security verification failed' });
+        }
+
+        // Verify the Turnstile token
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
+
+        if (!turnstileVerification.success) {
+            return res.status(400).json({
+                error: 'Security verification failed',
+                details: turnstileVerification.error
+            });
         }
 
         // Check if the user already exists with a credential
@@ -44,6 +98,7 @@ exports.requestRegistrationOptions = async (req, res) => {
         }
 
         // Generate a temporary user ID for registration
+        // We'll create the actual user record during verification
         const tempUserId = new Uint8Array(4);
         const randomId = Math.floor(Math.random() * 100000);
         tempUserId[0] = (randomId >> 24) & 0xff;
@@ -63,34 +118,18 @@ exports.requestRegistrationOptions = async (req, res) => {
             }
         });
 
-        // Ensure session exists and initialize pendingRegistrations if needed
-        if (!req.session) {
-            console.warn('Session middleware not detected! Creating a temporary session object.');
-            req.session = {};
-        }
-
-        if (!req.session.pendingRegistrations) {
-            req.session.pendingRegistrations = {};
-        }
-
-        // Store the challenge in session
+        // Store the challenge temporarily in session or a temporary store
+        // Instead of creating a user prematurely
+        req.session = req.session || {};
+        req.session.pendingRegistrations = req.session.pendingRegistrations || {};
         req.session.pendingRegistrations[username] = {
             challenge: options.challenge,
             created: new Date().toISOString()
         };
 
-        // Force session save to ensure data persistence
-        if (req.session.save) {
-            req.session.save(err => {
-                if (err) console.error('Error saving session:', err);
-                else console.log('Session saved successfully');
-            });
-        }
-
         console.log('Registration options generated:', {
             userName: options.user.name,
             challenge: options.challenge,
-            sessionSaved: !!req.session.pendingRegistrations[username]
         });
 
         return res.json(options);
@@ -103,72 +142,33 @@ exports.requestRegistrationOptions = async (req, res) => {
 // Registration verification
 exports.verifyRegistration = async (req, res) => {
     try {
-        const { username, attResp } = req.body;
+        const { username, attResp, turnstileToken } = req.body;
         if (!username || !attResp) {
             return res.status(400).json({ error: 'Missing fields' });
         }
 
-        console.log('Verifying registration for:', username);
-        console.log('Session data available:', !!req.session);
-        console.log('Pending registrations:', req.session?.pendingRegistrations ?
-            Object.keys(req.session.pendingRegistrations) : 'none');
+        if (!turnstileToken) {
+            return res.status(400).json({ error: 'Security verification failed' });
+        }
 
-        // Check if session and pendingRegistrations exist
-        if (!req.session || !req.session.pendingRegistrations) {
-            console.error('Session or pendingRegistrations not found');
+        // Verify the Turnstile token
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
 
-            // TEMPORARY FALLBACK: Store challenge directly in the database
-            // This is a fallback to bypass session issues
-            const user = await User.findOne({ where: { username } });
-            if (user && user.currentChallenge) {
-                console.log('Using fallback challenge from database');
-                const expectedChallenge = user.currentChallenge;
-
-                try {
-                    const verification = await verifyRegistrationResponse({
-                        response: attResp,
-                        expectedChallenge: expectedChallenge,
-                        expectedOrigin: expectedOrigin,
-                        expectedRPID: rpID,
-                    });
-
-                    if (!verification.verified) {
-                        return res.status(400).json({ error: 'Registration verification failed' });
-                    }
-
-                    // Continue with credential creation
-                    const credentialID = attResp.rawId || attResp.id;
-                    const credentialPublicKey = verification.registrationInfo?.credential?.publicKey;
-
-                    if (!credentialID || !credentialPublicKey) {
-                        throw new Error('Missing credential data in verification response');
-                    }
-
-                    // Update user with credentials
-                    user.credentialID = Buffer.from(credentialID, 'base64url');
-                    user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
-                    user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
-                    user.currentChallenge = null; // Clear challenge after use
-                    await user.save();
-
-                    return res.json({ success: true, message: 'Registration verified (fallback)' });
-                } catch (verifyErr) {
-                    console.error('Fallback verification failed:', verifyErr);
-                    return res.status(400).json({ error: 'Registration verification failed' });
-                }
-            }
-
-            return res.status(400).json({ error: 'No pending registration for this username' });
+        if (!turnstileVerification.success) {
+            return res.status(400).json({
+                error: 'Security verification failed',
+                details: turnstileVerification.error
+            });
         }
 
         // Get the pending registration from session
-        const pendingReg = req.session.pendingRegistrations[username];
-        if (!pendingReg) {
+        if (!req.session?.pendingRegistrations?.[username]) {
             return res.status(400).json({ error: 'No pending registration for this username' });
         }
 
+        const pendingReg = req.session.pendingRegistrations[username];
         const expectedChallenge = pendingReg.challenge;
-        console.log('Found expected challenge in session:', expectedChallenge?.substring(0, 10) + '...');
 
         const verification = await verifyRegistrationResponse({
             response: attResp,
@@ -218,11 +218,6 @@ exports.verifyRegistration = async (req, res) => {
         // Remove the pending registration
         delete req.session.pendingRegistrations[username];
 
-        // Force session save
-        if (req.session.save) {
-            req.session.save();
-        }
-
         console.log('Registration credentials saved successfully');
         return res.json({ success: true, message: 'Registration verified' });
     } catch (err) {
@@ -234,9 +229,25 @@ exports.verifyRegistration = async (req, res) => {
 // Login initialization
 exports.requestLoginOptions = async (req, res) => {
     try {
-        const { username } = req.body;
+        const { username, turnstileToken } = req.body;
+
         if (!username) {
             return res.status(400).json({ error: 'Username is required' });
+        }
+
+        if (!turnstileToken) {
+            return res.status(400).json({ error: 'Security verification failed' });
+        }
+
+        // Verify the Turnstile token
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
+
+        if (!turnstileVerification.success) {
+            return res.status(400).json({
+                error: 'Security verification failed',
+                details: turnstileVerification.error
+            });
         }
 
         const user = await User.findOne({ where: { username } });
@@ -298,9 +309,24 @@ exports.requestLoginOptions = async (req, res) => {
 // Login verification
 exports.verifyLogin = async (req, res) => {
     try {
-        const { username, authResp } = req.body;
+        const { username, authResp, turnstileToken } = req.body;
         if (!username || !authResp) {
             return res.status(400).json({ error: 'Missing fields' });
+        }
+
+        if (!turnstileToken) {
+            return res.status(400).json({ error: 'Security verification failed' });
+        }
+
+        // Verify the Turnstile token
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const turnstileVerification = await verifyTurnstileToken(turnstileToken, clientIp);
+
+        if (!turnstileVerification.success) {
+            return res.status(400).json({
+                error: 'Security verification failed',
+                details: turnstileVerification.error
+            });
         }
 
         const user = await User.findOne({ where: { username } });

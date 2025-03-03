@@ -7,7 +7,7 @@ const USERNAME_COOKIE_NAME = 'username';
 const SESSION_DURATION_DAYS = 7; // Cookie expiration time
 
 // Handle WebAuthn registration
-export async function handleRegistration(username) {
+export async function handleRegistration(username, turnstileToken) {
     const statusElement = document.getElementById('register-status');
 
     try {
@@ -20,7 +20,10 @@ export async function handleRegistration(username) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username }),
+            body: JSON.stringify({
+                username,
+                turnstileToken // Add the Turnstile token
+            }),
         });
 
         if (!resp.ok) {
@@ -47,6 +50,7 @@ export async function handleRegistration(username) {
             body: JSON.stringify({
                 username,
                 attResp,
+                turnstileToken // Include token again for additional verification
             }),
         });
 
@@ -58,6 +62,11 @@ export async function handleRegistration(username) {
         // 5. Registration successful!
         statusElement.textContent = 'Registration successful! You can now sign in.';
         statusElement.className = 'status-message success';
+
+        // Reset Turnstile widget
+        if (window.turnstile) {
+            window.turnstile.reset('#register-turnstile');
+        }
 
         // Switch to login tab after successful registration
         setTimeout(() => {
@@ -73,11 +82,16 @@ export async function handleRegistration(username) {
         console.error('Registration error:', error);
         statusElement.textContent = `Registration failed: ${error.message}`;
         statusElement.className = 'status-message error';
+
+        // Reset Turnstile widget on error
+        if (window.turnstile) {
+            window.turnstile.reset('#register-turnstile');
+        }
     }
 }
 
 // Handle WebAuthn login
-export async function handleLogin(username) {
+export async function handleLogin(username, turnstileToken) {
     const statusElement = document.getElementById('login-status');
 
     try {
@@ -90,7 +104,10 @@ export async function handleLogin(username) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username }),
+            body: JSON.stringify({
+                username,
+                turnstileToken // Add the Turnstile token
+            }),
         });
 
         if (!resp.ok) {
@@ -126,6 +143,7 @@ export async function handleLogin(username) {
             body: JSON.stringify({
                 username,
                 authResp,
+                turnstileToken // Include token again for verification
             }),
         });
 
@@ -140,6 +158,11 @@ export async function handleLogin(username) {
         statusElement.textContent = 'Login successful! Redirecting...';
         statusElement.className = 'status-message success';
 
+        // Reset Turnstile widget
+        if (window.turnstile) {
+            window.turnstile.reset('#login-turnstile');
+        }
+
         // Store authentication session information
         setSessionCookies(username, result.sessionToken);
 
@@ -152,6 +175,11 @@ export async function handleLogin(username) {
         console.error('Login error:', error);
         statusElement.textContent = `Login failed: ${error.message}`;
         statusElement.className = 'status-message error';
+
+        // Reset Turnstile widget on error
+        if (window.turnstile) {
+            window.turnstile.reset('#login-turnstile');
+        }
     }
 }
 

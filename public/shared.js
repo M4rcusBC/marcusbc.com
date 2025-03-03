@@ -1,6 +1,24 @@
 import {showSitemap} from "./sitemap.js";
 import {handleRegistration, handleLogin, handleLogout, isUserLoggedIn, checkUsernameExists} from "./auth.js";
 
+// Helper function to load the Turnstile script
+function loadTurnstileScript() {
+    return new Promise((resolve) => {
+        if (document.querySelector('script[src*="turnstile"]')) {
+            // Script already loaded
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+        script.onload = resolve;
+    });
+}
+
 export function loadNav() {
     const body = document.body;
     const header = document.createElement("header");
@@ -164,6 +182,11 @@ export function loadNav() {
 
     // Create auth modal but keep it hidden
     createAuthModal();
+
+    // Load the Turnstile script ahead of time
+    loadTurnstileScript().then(() => {
+        console.log('Turnstile script loaded');
+    });
 }
 
 export function loadFooter(parentElement) {
@@ -347,7 +370,7 @@ function addModalStyles() {
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 2em;
+            margin-top: 20px;
         }
 
         .auth-button:hover {
@@ -406,6 +429,13 @@ function addModalStyles() {
         .dropdown-option:hover {
             background-color: #f5f5f5;
         }
+        
+        /* Turnstile container styles */
+        .turnstile-container {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+        }
     `;
 
     document.head.appendChild(styleEl);
@@ -426,16 +456,17 @@ function createAuthModal() {
             <span class="close">&times;</span>
             <div class="auth-tabs">
                 <div class="tab active" data-tab="login">Sign In</div>
-                <div class="tab" data-tab="register">Register</div>
+                <div class="tab" data-tab="register">Sign Up</div>
             </div>
             
             <div id="login-form" class="auth-form active">
-                <h2>Sign In</h2>
+                <h2>Sign In with a Passkey</h2>
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" placeholder="Enter your username">
                     <div id="login-validation" class="validation-message"></div>
                 </div>
+                <div id="login-turnstile" class="turnstile-container"></div>
                 <button id="login-button" class="auth-button">
                     <i class="fa-solid fa-key"></i> Continue with Passkey
                 </button>
@@ -443,14 +474,15 @@ function createAuthModal() {
             </div>
             
             <div id="register-form" class="auth-form">
-                <h2>Register with a Passkey</h2>
+                <h2>Register with Passkey</h2>
                 <div class="form-group">
                     <label for="register-username">Username</label>
                     <input type="text" id="register-username" placeholder="Choose a username">
                     <div id="register-validation" class="validation-message"></div>
                 </div>
+                <div id="register-turnstile" class="turnstile-container"></div>
                 <button id="register-button" class="auth-button">
-                    <i class="fa-solid fa-key"></i> Register
+                    <i class="fa-solid fa-key"></i> Register with Passkey
                 </button>
                 <div id="register-status" class="status-message"></div>
             </div>
@@ -486,6 +518,9 @@ function createAuthModal() {
                 form.classList.remove('active');
             });
             modal.querySelector(`#${tabName}-form`).classList.add('active');
+
+            // Render Turnstile for the active tab
+            renderTurnstile(tabName);
         });
     });
 
@@ -505,6 +540,52 @@ function createAuthModal() {
     registerButton.addEventListener('click', () => {
         attemptRegistration();
     });
+}
+
+// Function to render Turnstile widgets when needed
+function renderTurnstile(formType = 'login') {
+    // Check if Turnstile is loaded
+    if (window.turnstile) {
+        // Clear any existing Turnstile widgets
+        const containerId = `${formType}-turnstile`;
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Clear the container
+        container.innerHTML = '';
+
+        // Render the Turnstile widget
+        window.turnstile.render(`#${containerId}`, {
+            sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3', // Replace with your actual sitekey
+            callback: function(token) {
+                // Store the token in a hidden input or data attribute
+                const formId = `${formType}-form`;
+                const form = document.getElementById(formId);
+
+                // Remove any existing token input
+                const existingToken = form.querySelector('input[name="cf-turnstile-response"]');
+                if (existingToken) {
+                    existingToken.remove();
+                }
+
+                // Add the new token
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'cf-turnstile-response';
+                tokenInput.value = token;
+                form.appendChild(tokenInput);
+
+                // Enable the submit button if username is valid
+                const button = document.getElementById(`${formType}-button`);
+                const usernameInput = document.getElementById(`${formType}-username`);
+                const isValidUsername = usernameInput.classList.contains('valid-input');
+
+                if (button.disabled && isValidUsername) {
+                    button.disabled = false;
+                }
+            }
+        });
+    }
 }
 
 // Setup real-time username validation
@@ -547,7 +628,10 @@ function setupUsernameValidation() {
                     validationMsg.className = 'validation-message success';
                     this.classList.add('valid-input');
                     this.classList.remove('invalid-input');
-                    loginButton.disabled = false;
+
+                    // Enable button only if Turnstile is completed
+                    const turnstileResponse = document.querySelector('#login-form input[name="cf-turnstile-response"]');
+                    loginButton.disabled = !turnstileResponse;
                 } else {
                     // Username doesn't exist, can't login
                     validationMsg.textContent = 'User does not exist';
@@ -594,7 +678,10 @@ function setupUsernameValidation() {
                     validationMsg.className = 'validation-message success';
                     this.classList.add('valid-input');
                     this.classList.remove('invalid-input');
-                    registerButton.disabled = false;
+
+                    // Enable button only if Turnstile is completed
+                    const turnstileResponse = document.querySelector('#register-form input[name="cf-turnstile-response"]');
+                    registerButton.disabled = !turnstileResponse;
                 }
             })
             .catch(error => {
@@ -634,9 +721,19 @@ function setupEnterKeySubmission() {
 function attemptLogin() {
     const username = document.getElementById('login-username').value.trim();
     const statusElement = document.getElementById('login-status');
+    const form = document.getElementById('login-form');
+
+    // Get the turnstile response
+    const turnstileResponse = form.querySelector('input[name="cf-turnstile-response"]')?.value;
 
     if (!username) {
         statusElement.textContent = 'Please enter a username';
+        statusElement.className = 'status-message error';
+        return;
+    }
+
+    if (!turnstileResponse) {
+        statusElement.textContent = 'Please complete the security check';
         statusElement.className = 'status-message error';
         return;
     }
@@ -645,17 +742,27 @@ function attemptLogin() {
     statusElement.textContent = 'Authenticating...';
     statusElement.className = 'status-message info';
 
-    // Call the login handler
-    handleLogin(username);
+    // Call the login handler with the turnstile token
+    handleLogin(username, turnstileResponse);
 }
 
 // Registration helper function to reuse code
 function attemptRegistration() {
     const username = document.getElementById('register-username').value.trim();
     const statusElement = document.getElementById('register-status');
+    const form = document.getElementById('register-form');
+
+    // Get the turnstile response
+    const turnstileResponse = form.querySelector('input[name="cf-turnstile-response"]')?.value;
 
     if (!username) {
         statusElement.textContent = 'Please enter a username';
+        statusElement.className = 'status-message error';
+        return;
+    }
+
+    if (!turnstileResponse) {
+        statusElement.textContent = 'Please complete the security check';
         statusElement.className = 'status-message error';
         return;
     }
@@ -664,8 +771,8 @@ function attemptRegistration() {
     statusElement.textContent = 'Setting up your passkey...';
     statusElement.className = 'status-message info';
 
-    // Call the registration handler
-    handleRegistration(username);
+    // Call the registration handler with the turnstile token
+    handleRegistration(username, turnstileResponse);
 }
 
 // Function to show the authentication modal
@@ -673,14 +780,25 @@ export function showAuthModal() {
     const modal = document.getElementById('auth-modal');
     if (modal) {
         modal.style.display = 'block';
-        // Focus the username field in the active tab
-        const activeForm = modal.querySelector('.auth-form.active');
-        if (activeForm) {
-            const usernameInput = activeForm.querySelector('input[type="text"]');
-            if (usernameInput) {
-                usernameInput.focus();
+
+        // Load Turnstile script if not already loaded
+        loadTurnstileScript().then(() => {
+            // Determine which tab is active
+            const activeTab = modal.querySelector('.tab.active');
+            const activeTabName = activeTab ? activeTab.getAttribute('data-tab') : 'login';
+
+            // Render the Turnstile for the active tab
+            renderTurnstile(activeTabName);
+
+            // Focus the username field in the active tab
+            const activeForm = modal.querySelector('.auth-form.active');
+            if (activeForm) {
+                const usernameInput = activeForm.querySelector('input[type="text"]');
+                if (usernameInput) {
+                    usernameInput.focus();
+                }
             }
-        }
+        });
     }
 }
 
