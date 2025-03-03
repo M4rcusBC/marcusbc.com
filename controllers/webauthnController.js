@@ -13,6 +13,10 @@ const expectedOrigin = process.env.NODE_ENV === 'production'
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
+// Store pending registration challenges in memory
+// In a production environment with multiple servers, consider using Redis instead
+const pendingRegistrations = new Map(); // username -> { challenge, timestamp }
+
 // Helper function to verify Turnstile tokens
 async function verifyTurnstileToken(token, ip) {
     if (!token) {
@@ -109,13 +113,18 @@ exports.requestRegistrationOptions = async (req, res) => {
             });
         }
 
-        // Check if user already exists with credentials
+        // Check if user already exists
         const existingUser = await User.findOne({ where: { username } });
-        if (existingUser && existingUser.credentialID) {
-            return res.status(409).json({
-                error: 'Username already registered',
-                message: 'This username is already registered. Please sign in instead.'
-            });
+        if (existingUser) {
+            // Allow existing users to register only if they don't have credentials yet
+            if (existingUser.credentialID) {
+                return res.status(409).json({
+                    error: 'Username already registered',
+                    message: 'This username is already registered. Please sign in instead.'
+                });
+            }
+
+            // If they don't have credentials, we'll let them complete registration
         }
 
         // Generate a temporary user ID for registration
@@ -138,18 +147,11 @@ exports.requestRegistrationOptions = async (req, res) => {
             }
         });
 
-        // Create or update the user with the challenge
-        let user = existingUser;
-        if (!user) {
-            user = await User.create({
-                username,
-                currentChallenge: options.challenge,
-                createdAt: new Date()
-            });
-        } else {
-            user.currentChallenge = options.challenge;
-            await user.save();
-        }
+        // Store the challenge in the pendingRegistrations map instead of creating a user
+        pendingRegistrations.set(username, {
+            challenge: options.challenge,
+            timestamp: Date.now()
+        });
 
         console.log('Registration options generated:', {
             userName: options.user.name,
@@ -163,7 +165,7 @@ exports.requestRegistrationOptions = async (req, res) => {
     }
 };
 
-// Registration verification - NO TURNSTILE TOKEN HERE
+// Registration verification
 exports.verifyRegistration = async (req, res) => {
     try {
         const { username, attResp } = req.body;
@@ -171,14 +173,14 @@ exports.verifyRegistration = async (req, res) => {
             return res.status(400).json({ error: 'Missing fields' });
         }
 
-        // Get the user record with the stored challenge
-        const user = await User.findOne({ where: { username } });
-        if (!user || !user.currentChallenge) {
+        // Get the pending registration data
+        const pendingReg = pendingRegistrations.get(username);
+        if (!pendingReg) {
             return res.status(400).json({ error: 'No registration in progress for this username' });
         }
 
-        const expectedChallenge = user.currentChallenge;
-        
+        const expectedChallenge = pendingReg.challenge;
+
         // Verify the registration response
         const verification = await verifyRegistrationResponse({
             response: attResp,
@@ -205,12 +207,28 @@ exports.verifyRegistration = async (req, res) => {
             throw new Error('Missing credential public key in verification response');
         }
 
-        // Update the user record with the credential information
-        user.credentialID = Buffer.from(credentialID, 'base64url');
-        user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
-        user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
-        user.currentChallenge = null; // Clear the challenge
-        await user.save();
+        // Only after successful verification, create or update the user
+        let user = await User.findOne({ where: { username } });
+
+        if (!user) {
+            // Create new user with the verified credential
+            user = await User.create({
+                username,
+                credentialID: Buffer.from(credentialID, 'base64url'),
+                credentialPublicKey: Buffer.from(Object.values(credentialPublicKey)),
+                credentialCounter: verification.registrationInfo?.credential?.counter || 0,
+                createdAt: new Date()
+            });
+        } else {
+            // Update existing user with the verified credential
+            user.credentialID = Buffer.from(credentialID, 'base64url');
+            user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
+            user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
+            await user.save();
+        }
+
+        // Clean up the pending registration
+        pendingRegistrations.delete(username);
 
         console.log('Registration credentials saved successfully');
         return res.json({ success: true, message: 'Registration verified' });
@@ -377,6 +395,22 @@ exports.verifyLogin = async (req, res) => {
         return res.status(500).json({ error: `Server error: ${err.message}` });
     }
 };
+
+// Add cleanup function to prevent memory leaks from pending registrations
+function cleanupPendingRegistrations() {
+    const ONE_HOUR = 60 * 60 * 1000; // 1 hour in milliseconds
+    const now = Date.now();
+
+    for (const [username, data] of pendingRegistrations.entries()) {
+        if (now - data.timestamp > ONE_HOUR) {
+            pendingRegistrations.delete(username);
+            console.log(`Cleaned up stale registration for username: ${username}`);
+        }
+    }
+}
+
+// Run cleanup every hour
+setInterval(cleanupPendingRegistrations, 60 * 60 * 1000);
 
 // Helper function to generate a session token
 function generateRandomToken() {
