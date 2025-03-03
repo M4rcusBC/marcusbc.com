@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "reset-user-table": "node scripts/reset-user-table.js",
+    "db-tools": "node scripts/db-tools.js"
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.1.0",

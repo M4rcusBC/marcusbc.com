@@ -347,7 +347,7 @@ function addModalStyles() {
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 20px;
+            margin-top: 2em;
         }
 
         .auth-button:hover {
@@ -426,11 +426,11 @@ function createAuthModal() {
             <span class="close">&times;</span>
             <div class="auth-tabs">
                 <div class="tab active" data-tab="login">Sign In</div>
-                <div class="tab" data-tab="register">Sign Up</div>
+                <div class="tab" data-tab="register">Register</div>
             </div>
             
             <div id="login-form" class="auth-form active">
-                <h2>Sign In with a Passkey</h2>
+                <h2>Sign In</h2>
                 <div class="form-group">
                     <label for="login-username">Username</label>
                     <input type="text" id="login-username" placeholder="Enter your username">
@@ -443,14 +443,14 @@ function createAuthModal() {
             </div>
             
             <div id="register-form" class="auth-form">
-                <h2>Register with Passkey</h2>
+                <h2>Register with a Passkey</h2>
                 <div class="form-group">
                     <label for="register-username">Username</label>
                     <input type="text" id="register-username" placeholder="Choose a username">
                     <div id="register-validation" class="validation-message"></div>
                 </div>
                 <button id="register-button" class="auth-button">
-                    <i class="fa-solid fa-key"></i> Register with Passkey
+                    <i class="fa-solid fa-key"></i> Register
                 </button>
                 <div id="register-status" class="status-message"></div>
             </div>

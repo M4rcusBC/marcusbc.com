@@ -44,7 +44,6 @@ exports.requestRegistrationOptions = async (req, res) => {
         }
 
         // Generate a temporary user ID for registration
-        // We'll create the actual user record during verification
         const tempUserId = new Uint8Array(4);
         const randomId = Math.floor(Math.random() * 100000);
         tempUserId[0] = (randomId >> 24) & 0xff;
@@ -64,18 +63,34 @@ exports.requestRegistrationOptions = async (req, res) => {
             }
         });
 
-        // Store the challenge temporarily in session or a temporary store
-        // Instead of creating a user prematurely
-        req.session = req.session || {};
-        req.session.pendingRegistrations = req.session.pendingRegistrations || {};
+        // Ensure session exists and initialize pendingRegistrations if needed
+        if (!req.session) {
+            console.warn('Session middleware not detected! Creating a temporary session object.');
+            req.session = {};
+        }
+
+        if (!req.session.pendingRegistrations) {
+            req.session.pendingRegistrations = {};
+        }
+
+        // Store the challenge in session
         req.session.pendingRegistrations[username] = {
             challenge: options.challenge,
             created: new Date().toISOString()
         };
 
+        // Force session save to ensure data persistence
+        if (req.session.save) {
+            req.session.save(err => {
+                if (err) console.error('Error saving session:', err);
+                else console.log('Session saved successfully');
+            });
+        }
+
         console.log('Registration options generated:', {
             userName: options.user.name,
             challenge: options.challenge,
+            sessionSaved: !!req.session.pendingRegistrations[username]
         });
 
         return res.json(options);
@@ -93,13 +108,67 @@ exports.verifyRegistration = async (req, res) => {
             return res.status(400).json({ error: 'Missing fields' });
         }
 
-        // Get the pending registration from session
-        if (!req.session?.pendingRegistrations?.[username]) {
+        console.log('Verifying registration for:', username);
+        console.log('Session data available:', !!req.session);
+        console.log('Pending registrations:', req.session?.pendingRegistrations ?
+            Object.keys(req.session.pendingRegistrations) : 'none');
+
+        // Check if session and pendingRegistrations exist
+        if (!req.session || !req.session.pendingRegistrations) {
+            console.error('Session or pendingRegistrations not found');
+
+            // TEMPORARY FALLBACK: Store challenge directly in the database
+            // This is a fallback to bypass session issues
+            const user = await User.findOne({ where: { username } });
+            if (user && user.currentChallenge) {
+                console.log('Using fallback challenge from database');
+                const expectedChallenge = user.currentChallenge;
+
+                try {
+                    const verification = await verifyRegistrationResponse({
+                        response: attResp,
+                        expectedChallenge: expectedChallenge,
+                        expectedOrigin: expectedOrigin,
+                        expectedRPID: rpID,
+                    });
+
+                    if (!verification.verified) {
+                        return res.status(400).json({ error: 'Registration verification failed' });
+                    }
+
+                    // Continue with credential creation
+                    const credentialID = attResp.rawId || attResp.id;
+                    const credentialPublicKey = verification.registrationInfo?.credential?.publicKey;
+
+                    if (!credentialID || !credentialPublicKey) {
+                        throw new Error('Missing credential data in verification response');
+                    }
+
+                    // Update user with credentials
+                    user.credentialID = Buffer.from(credentialID, 'base64url');
+                    user.credentialPublicKey = Buffer.from(Object.values(credentialPublicKey));
+                    user.credentialCounter = verification.registrationInfo?.credential?.counter || 0;
+                    user.currentChallenge = null; // Clear challenge after use
+                    await user.save();
+
+                    return res.json({ success: true, message: 'Registration verified (fallback)' });
+                } catch (verifyErr) {
+                    console.error('Fallback verification failed:', verifyErr);
+                    return res.status(400).json({ error: 'Registration verification failed' });
+                }
+            }
+
             return res.status(400).json({ error: 'No pending registration for this username' });
         }
 
+        // Get the pending registration from session
         const pendingReg = req.session.pendingRegistrations[username];
+        if (!pendingReg) {
+            return res.status(400).json({ error: 'No pending registration for this username' });
+        }
+
         const expectedChallenge = pendingReg.challenge;
+        console.log('Found expected challenge in session:', expectedChallenge?.substring(0, 10) + '...');
 
         const verification = await verifyRegistrationResponse({
             response: attResp,
@@ -148,6 +217,11 @@ exports.verifyRegistration = async (req, res) => {
 
         // Remove the pending registration
         delete req.session.pendingRegistrations[username];
+
+        // Force session save
+        if (req.session.save) {
+            req.session.save();
+        }
 
         console.log('Registration credentials saved successfully');
         return res.json({ success: true, message: 'Registration verified' });

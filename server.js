@@ -1,10 +1,21 @@
 const express = require('express');
 const sequelize = require('./db');
 const webauthnRoutes = require('./routes/webauthn');
+const session = require("express-session");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'changeme-use-strong-secret-in-production',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 2 // 2 hours
+    }
+}));
 
 // Initialize and sync database
 sequelize.sync()
