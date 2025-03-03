@@ -2,6 +2,7 @@ const express = require('express');
 const sequelize = require('./db');
 const webauthnRoutes = require('./routes/webauthn');
 const session = require("express-session");
+const config = require("./config/config");
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,7 @@ app.get('/'), (req, res) => {
 }
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || config.server.port;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
