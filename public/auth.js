@@ -142,7 +142,7 @@ export async function handleLogin(username, turnstileToken) {
             body: JSON.stringify({
                 username,
                 authResp
-                // No turnstileToken here - it was already verified
+                // turnstileToken already verified
             }),
         });
 
@@ -225,12 +225,12 @@ export async function checkUsernameExists(username) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username: username.trim() }),
+            // Usernames standardized to lowercase for case-insensitive checks
+            body: JSON.stringify({ username: username.trim().toLowerCase() }),
         });
 
         if (!response.ok) {
             console.error('Error checking username:', response.statusText);
-            // If there's a server error, we'll return false to be safe
             return false;
         }
 
@@ -238,7 +238,6 @@ export async function checkUsernameExists(username) {
         return data.exists;
     } catch (error) {
         console.error('Error checking if username exists:', error);
-        // If there's an error, we'll return false to be safe
         return false;
     }
 }

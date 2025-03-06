@@ -81,8 +81,7 @@ function createLayout(parentElement) {
     const form = document.createElement('form');
     form.id = 'contact-form';
     form.method = 'POST';
-    // You can use a service like Formspree or your own backend
-    form.action = '#';
+    form.action = '/messages/send';
 
     // Name field
     const nameGroup = createFormGroup('name', 'text', 'Your Name*', true);

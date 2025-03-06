@@ -1,6 +1,7 @@
 const express = require('express');
 const sequelize = require('./db');
 const webauthnRoutes = require('./routes/webauthn');
+const messagesRoutes = require('./routes/messages');
 const session = require("express-session");
 const config = require("./config/config");
 
@@ -25,6 +26,7 @@ sequelize.sync()
 
 // Mount WebAuthn routes
 app.use('/webauthn', webauthnRoutes);
+app.use('/messages', messagesRoutes);
 
 // Default route - send public index.html
 app.use(express.static('public'))
