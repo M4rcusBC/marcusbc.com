@@ -81,7 +81,7 @@ exports.checkUsernameExists = async (req, res) => {
 
         const existingUser = await User.findOne({ where: { username } });
 
-        // Just return whether the user exists or not, no user creation here
+        console.log('Existing user: ' + !!existingUser);
         return res.json({ exists: !!existingUser });
     } catch (err) {
         console.error('checkUsernameExists error:', err);
