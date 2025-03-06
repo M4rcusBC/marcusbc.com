@@ -26,6 +26,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadTurnstileScript();
 
+    // Render Turnstile widget once the script is loaded
+    if (window.turnstile) {
+        renderTurnstileWidget();
+    } else {
+        // If turnstile isn't immediately available, try again after a short delay
+        setTimeout(() => {
+            if (window.turnstile) {
+                renderTurnstileWidget();
+            } else {
+                console.error('Turnstile failed to load');
+            }
+        }, 1000);
+    }
+
     const jumpToTopButton = document.createElement('button');
     jumpToTopButton.className = 'jump-to-top';
     jumpToTopButton.style.zIndex = '1000';
@@ -44,6 +58,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+function renderTurnstileWidget() {
+    const widgetContainer = document.getElementById('turnstile-widget');
+    if (widgetContainer) {
+        window.turnstile.render('#turnstile-widget', {
+            sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
+            callback: function(token) {
+                // Find or create hidden input for the token
+                let tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
+                if (!tokenInput) {
+                    tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = 'cf-turnstile-response';
+                    document.getElementById('contact-form').appendChild(tokenInput);
+                }
+                tokenInput.value = token;
+            }
+        });
+    }
+}
 
 function createLayout(parentElement) {
     // Contact Hero Section
@@ -81,7 +115,7 @@ function createLayout(parentElement) {
     const form = document.createElement('form');
     form.id = 'contact-form';
     form.method = 'POST';
-    form.action = '/messages/send';
+    // Don't set action attribute since we'll handle submission via JavaScript
 
     // Name field
     const nameGroup = createFormGroup('name', 'text', 'Your Name*', true);
@@ -174,21 +208,6 @@ function createLayout(parentElement) {
     form.addEventListener('submit', handleFormSubmit);
 
     formSection.appendChild(form);
-
-    window.onload = function() {
-        if (window.turnstile) {
-            window.turnstile.render('#turnstile-widget', {
-                sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
-                callback: function(token) {
-                    const tokenInput = document.createElement('input');
-                    tokenInput.type = 'hidden';
-                    tokenInput.name = 'cf-turnstile-response';
-                    tokenInput.value = token;
-                    form.appendChild(tokenInput);
-                }
-            });
-        }
-    };
 
     // Social Links Section
     const socialSection = document.createElement('section');
@@ -312,11 +331,11 @@ function createLayout(parentElement) {
     const faqs = [
         {
             question: 'What services do you offer?',
-            answer: 'I specialize in web development, software engineering, and UI/UX design. My expertise includes front-end development with React, back-end development with Node.js, and full-stack applications.'
+            answer: 'I specialize in web development, software engineering, and UI/UX design. My expertise includes front-end development with React, back-end development with Node.js, and full-stack [...]'
         },
         {
             question: 'How quickly can you complete a project?',
-            answer: 'Project timelines vary based on complexity and scope. Typically, small projects take 1-2 weeks, while larger ones might take 1-3 months. I\'ll provide a detailed timeline during our initial consultation.'
+            answer: 'Project timelines vary based on complexity and scope. Typically, small projects take 1-2 weeks, while larger ones might take 1-3 months. I\'ll provide a detailed timeline during o[...]'
         },
         {
             question: 'Do you offer maintenance services after project completion?',
@@ -487,7 +506,6 @@ function detectSocialHandle(value) {
     return null;
 }
 
-
 function createFormGroup(id, type, labelText, isRequired = false) {
     const group = document.createElement('div');
     group.className = 'form-group';
@@ -508,6 +526,7 @@ function createFormGroup(id, type, labelText, isRequired = false) {
     return group;
 }
 
+// Updated form submission handler that sends to the correct endpoint
 function handleFormSubmit(event) {
     event.preventDefault();
 
@@ -524,7 +543,6 @@ function handleFormSubmit(event) {
         showError(errorContainer, 'Please complete the Turnstile challenge.');
         return;
     }
-
 
     const name = formData.get('name');
     const contactMethod = formData.get('contactMethod');
@@ -549,10 +567,28 @@ function handleFormSubmit(event) {
     submitButton.textContent = 'Sending...';
     submitButton.disabled = true;
 
-    // Send data to your backend for verification
-    submitFormWithTurnstile(formData)
+    // Convert FormData to JSON
+    const formDataJSON = {};
+    formData.forEach((value, key) => {
+        formDataJSON[key] = value;
+    });
+
+    // Send data to the correct backend route for verification
+    fetch('/messages/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formDataJSON)
+    })
         .then(response => {
-            if (response.success) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
                 // Success handling
                 form.reset();
                 submitButton.textContent = 'Message Sent!';
@@ -569,7 +605,7 @@ function handleFormSubmit(event) {
                 }, 3000);
             } else {
                 // Error handling
-                showError(errorContainer, response.error || 'Failed to send message. Please try again.');
+                showError(errorContainer, data.error || 'Failed to send message. Please try again.');
                 submitButton.textContent = originalText;
                 submitButton.disabled = false;
 
@@ -592,25 +628,11 @@ function handleFormSubmit(event) {
         });
 }
 
-// Function to submit the form with Turnstile validation
-async function submitFormWithTurnstile(formData) {
-    try {
-        // Replace with your actual backend endpoint
-        const response = await fetch('/api/contact', {
-            method: 'POST',
-            body: formData
-        });
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error submitting form:', error);
-        throw error;
-    }
-}
-
 function showError(container, message) {
     container.textContent = message;
     container.style.display = 'block';
+    // Scroll to error
+    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function validateEmail(email) {
