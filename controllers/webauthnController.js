@@ -123,7 +123,6 @@ exports.requestRegistrationOptions = async (req, res) => {
                     message: 'This username is already registered. Please sign in instead.'
                 });
             }
-
             // If they don't have credentials, we'll let them complete registration
         }
 
@@ -310,7 +309,7 @@ exports.requestLoginOptions = async (req, res) => {
     }
 };
 
-// Login verification - NO TURNSTILE TOKEN HERE
+// Login verification
 exports.verifyLogin = async (req, res) => {
     try {
         const { username, authResp } = req.body;

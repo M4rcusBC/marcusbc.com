@@ -24,12 +24,15 @@ sequelize.sync()
     .then(() => console.log('MySQL DB synced'))
     .catch((err) => console.error('DB sync error:', err));
 
+console.log(process.env.NODE_ENV);
+
 // Mount WebAuthn routes
 app.use('/webauthn', webauthnRoutes);
 app.use('/messages', messagesRoutes);
+app.use('/cc', express.static('~/CyberChef'));
 
 // Default route - send public index.html
-app.use(express.static('public'))
+app.use(express.static('public'));
 app.get('/'), (req, res) => {
     res.sendFile(__dirname + '/index.html');
 }

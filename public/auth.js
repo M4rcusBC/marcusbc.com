@@ -74,7 +74,10 @@ export async function handleRegistration(username, turnstileToken) {
 
             // Pre-fill the login username field
             const loginUsernameField = document.getElementById('login-username');
-            if (loginUsernameField) loginUsernameField.value = username;
+            if (loginUsernameField) {
+                loginUsernameField.value = username;
+                loginUsernameField.dispatchEvent(new Event('input'));
+            }
         }, 2000);
 
     } catch (error) {
