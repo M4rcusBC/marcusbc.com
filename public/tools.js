@@ -41,10 +41,11 @@ function createLayout(parentElement) {
     heroContent.className = 'hero-content';
 
     const heroTitle = document.createElement('h1');
-    heroTitle.textContent = 'My Development Tools & Projects';
+    heroTitle.textContent = 'Welcome to Tools!';
 
     const heroSubtitle = document.createElement('p');
-    heroSubtitle.textContent = 'A showcase of software tools and technologies I\'ve built or contributed to';
+    heroSubtitle.textContent = 'I host and maintain these tools for the use of logged-in users who find them useful.\nThese tools are open-source and developed by myself unless otherwise indicated.';
+
 
     heroContent.appendChild(heroTitle);
     heroContent.appendChild(heroSubtitle);

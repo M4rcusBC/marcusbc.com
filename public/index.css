@@ -1,11 +1,13 @@
+/* Import font if not already in shared-styles.css */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+/* Keep index.css variables for backward compatibility */
 :root {
     --color-primary: rgb(92, 114, 133);
     --color-secondary: rgb(129, 140, 120);
     --color-accent: rgb(167, 180, 158);
     --color-background: rgb(226, 224, 200);
-    --rounded: 1em;
+    --rounded: var(--border-radius-lg, 1em);
 }
 
 html {
@@ -236,7 +238,7 @@ nav li:hover {
 
 .site-footer {
     background-color: var(--color-primary);
-    color: #fff;
+    color: var(--color-white, #fff);
     padding: 1.5rem;
     text-align: center;
     border-top-left-radius: var(--rounded);
@@ -246,7 +248,7 @@ nav li:hover {
 }
 
 .site-footer nav a {
-    color: #fff;
+    color: var(--color-white, #fff);
     margin: 0 0.5rem;
     text-decoration: none;
 }
@@ -314,7 +316,6 @@ nav li:hover {
 }
 
 /* Carousel styling */
-
 .carousel {
     margin: 0 auto;
     padding: 20px 0;
@@ -334,7 +335,7 @@ nav li:hover {
 
 .card {
     width: 100%;
-    color: black;
+    color: var(--color-white, black);
     border-radius: var(--rounded);
     box-shadow: rgba(0, 0, 0, 0.1) 5px 5px 20px 0;
     padding: 20px;
@@ -358,27 +359,30 @@ nav li:hover {
     animation-play-state: paused;
 }
 
+/* Jump to top button */
 .jump-to-top {
-    display: none;
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: var(--space-lg, 20px);
+    right: var(--space-lg, 20px);
     width: 40px;
     height: 40px;
-    background-color: var(--color-primary);
-    color: #fff;
-    border: none;
     border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--color-white, #fff);
+    border: none;
+    font-size: 1.5em;
     cursor: pointer;
-    font-size: 24px;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: opacity 0.3s;
+    display: none;
+    box-shadow: var(--shadow-md, 0 4px 8px rgba(0,0,0,0.12));
+    transition: var(--transition, all 0.3s ease);
+    z-index: 100;
+    text-align: center;
+    line-height: 40px;
 }
 
 .jump-to-top:hover {
-    background-color: var(--color-accent);
+    background-color: var(--color-secondary);
+    transform: translateY(-3px);
 }
 
 /* Better Card Design */
@@ -386,12 +390,12 @@ nav li:hover {
     background-color: var(--color-primary);
     border-radius: var(--rounded);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm, 0 4px 8px rgba(0,0,0,0.1));
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-md, 0 8px 16px rgba(0,0,0,0.15));
 }
 
 /* Button Design */
@@ -408,7 +412,7 @@ nav li:hover {
 
 .btn-primary {
     background-color: var(--color-primary);
-    color: white;
+    color: var(--color-white, white);
 }
 
 .btn-primary:hover {
@@ -424,7 +428,7 @@ nav li:hover {
 
 .btn-secondary:hover {
     background-color: var(--color-primary);
-    color: white;
+    color: var(--color-white, white);
 }
 
 .personality-tags {
@@ -436,7 +440,7 @@ nav li:hover {
 .personality-tag {
     display: inline-block;
     background-color: var(--color-secondary);
-    color: #fff;
+    color: var(--color-white, #fff);
     padding: 0.5em 1em;
     border-radius: var(--rounded);
     margin: 0.5em;
@@ -458,10 +462,10 @@ nav li:hover {
 }
 
 .project-item {
-    background-color: white;
+    background-color: var(--color-white, white);
     border-radius: var(--rounded);
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm, 0 4px 8px rgba(0,0,0,0.1));
     transition: transform 0.3s ease;
 }
 
@@ -473,7 +477,7 @@ nav li:hover {
     margin: 0;
     padding: 1rem;
     background-color: var(--color-secondary);
-    color: white;
+    color: var(--color-white, white);
 }
 
 .project-item-content {
@@ -552,6 +556,8 @@ nav li:hover {
     z-index: 997; /* Below the nav-links but above everything else */
     display: none;
 }
+
+/* UPDATED LOGIN MODAL STYLES */
 /* Dark overlay behind modal */
 .overlay-login {
     position: fixed;
@@ -560,7 +566,8 @@ nav li:hover {
     right: 0;
     bottom: 0;
     z-index: 999;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -568,54 +575,243 @@ nav li:hover {
 
 /* Modal container */
 .modal-container-login {
-    background-color: var(--color-background);
-    border-radius: var(--rounded);
+    background-color: var(--color-white, #fff);
+    border-radius: var(--border-radius-lg, 10px);
     max-width: 400px;
     width: 90%;
-    padding: 1.5em;
+    padding: var(--space-xl, 2rem);
     position: relative;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-lg, 0 5px 15px rgba(0, 0, 0, 0.3));
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Close button */
 .modal-close-btn {
     position: absolute;
-    top: 0.5em;
-    right: 0.75em;
+    top: var(--space-sm, 0.5rem);
+    right: var(--space-md, 1rem);
     background: none;
     border: none;
     font-size: 1.5em;
     cursor: pointer;
-    color: var(--color-primary);
+    color: #aaa;
+    transition: var(--transition-fast, all 0.2s ease);
+}
+
+.modal-close-btn:hover {
+    color: var(--color-text, #333);
 }
 
 /* Title styling */
 .modal-container-login h2 {
     margin-top: 0;
-    margin-bottom: 1em;
+    margin-bottom: var(--space-lg, 1.5rem);
     color: var(--color-primary);
     text-align: center;
+    font-weight: 600;
+}
+
+/* Login form */
+.login-form {
+    margin-bottom: var(--space-lg, 1.5rem);
+}
+
+/* Input styling */
+.login-form input {
+    width: 100%;
+    padding: var(--space-md, 1rem);
+    margin-bottom: var(--space-md, 1rem);
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius, 5px);
+    font-size: var(--font-size, 1rem);
+    transition: var(--transition-fast, all 0.2s ease);
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(92, 114, 133, 0.2);
+}
+
+/* Login button */
+.login-button {
+    width: 100%;
+    padding: var(--space-md, 1rem);
+    background-color: var(--color-primary);
+    color: var(--color-white, #fff);
+    border: none;
+    border-radius: var(--border-radius, 5px);
+    font-size: var(--font-size, 1rem);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition, all 0.3s ease);
+    margin-top: var(--space-sm, 0.5rem);
+}
+
+.login-button:hover {
+    background-color: var(--color-secondary);
+    transform: translateY(-2px);
 }
 
 /* Links list */
 .login-link-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: var(--space-lg, 1.5rem) 0 0;
     text-align: center;
 }
 
 .login-link-list li {
-    margin: 0.75em 0;
+    margin: var(--space-sm, 0.5rem) 0;
 }
 
 .login-link-list li a {
     text-decoration: none;
     color: var(--color-primary);
-    font-weight: 600;
-    transition: color 0.2s ease-in-out;
+    font-weight: 500;
+    transition: var(--transition-fast, all 0.2s ease);
 }
 
 .login-link-list li a:hover {
-    color: var(--color-accent);
+    color: var(--color-secondary);
+    text-decoration: underline;
+}
+
+/* Divider */
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-lg, 1.5rem) 0;
+    color: #888;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.login-divider span {
+    padding: 0 var(--space-sm, 0.5rem);
+    font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* Social login buttons */
+.social-login-buttons {
+    display: flex;
+    gap: var(--space-sm, 0.5rem);
+    margin-top: var(--space-md, 1rem);
+}
+
+.social-login-button {
+    flex: 1;
+    padding: var(--space-sm, 0.5rem);
+    border: none;
+    border-radius: var(--border-radius, 5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast, all 0.2s ease);
+    background-color: #f5f5f5;
+    color: var(--color-text, #333);
+}
+
+.social-login-button:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.social-login-button i {
+    margin-right: var(--space-xs, 0.25rem);
+}
+
+/* Error message */
+.login-error {
+    margin-top: var(--space-md, 1rem);
+    padding: var(--space-sm, 0.5rem);
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #b71c1c;
+    border-radius: var(--border-radius, 5px);
+    font-size: var(--font-size-sm, 0.875rem);
+    text-align: center;
+    display: none;
+}
+
+/* Status message */
+.login-status {
+    margin-top: var(--space-md, 1rem);
+    padding: var(--space-sm, 0.5rem);
+    border-radius: var(--border-radius, 5px);
+    font-size: var(--font-size-sm, 0.875rem);
+    text-align: center;
+}
+
+.login-status.info {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: #0d47a1;
+}
+
+.login-status.success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #1b5e20;
+}
+
+.login-status.error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #b71c1c;
+}
+
+/* Registration form styles */
+.register-form {
+    display: none;
+}
+
+.register-form.active {
+    display: block;
+}
+
+/* Tabs for login/register */
+.auth-tabs {
+    display: flex;
+    margin-bottom: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid #ddd;
+}
+
+.auth-tab {
+    padding: var(--space-md, 1rem) var(--space-lg, 1.5rem);
+    cursor: pointer;
+    margin-right: var(--space-sm, 0.5rem);
+    border-radius: var(--border-radius, 5px) var(--border-radius, 5px) 0 0;
+    transition: var(--transition-fast, all 0.2s ease);
+}
+
+.auth-tab:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.auth-tab.active {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid #ddd;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+/* Turnstile container */
+.turnstile-container {
+    margin: var(--space-lg, 1.5rem) 0;
+    display: flex;
+    justify-content: center;
 }

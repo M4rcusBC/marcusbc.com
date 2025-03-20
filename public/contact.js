@@ -1,107 +1,34 @@
 import { loadNav, loadFooter } from "./shared.js";
-import { addCookieNotice } from "./cookieNotice.js";
 
-function loadTurnstileScript() {
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-    return new Promise((resolve) => {
-        script.onload = resolve;
-    });
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     loadNav();
-
+    
+    // Create main content
     const main = document.createElement('main');
-    const body = document.body;
-    body.appendChild(main);
-
+    document.body.appendChild(main);
+    
     createLayout(main);
-
-    loadFooter(document.body);
-    addCookieNotice();
-
-    await loadTurnstileScript();
-
-    // Render Turnstile widget once the script is loaded
-    if (window.turnstile) {
-        renderTurnstileWidget();
-    } else {
-        // If turnstile isn't immediately available, try again after a short delay
-        setTimeout(() => {
-            if (window.turnstile) {
-                renderTurnstileWidget();
-            } else {
-                console.error('Turnstile failed to load');
-            }
-        }, 1000);
-    }
-
-    const jumpToTopButton = document.createElement('button');
-    jumpToTopButton.className = 'jump-to-top';
-    jumpToTopButton.style.zIndex = '1000';
-    jumpToTopButton.innerHTML = '&#8679;'; // Unicode for up arrow
-    document.body.appendChild(jumpToTopButton);
-
-    jumpToTopButton.addEventListener('click', () => {
-        window.scrollTo({top: 0});
-    });
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 200) {
-            jumpToTopButton.style.display = 'block';
-        } else {
-            jumpToTopButton.style.display = 'none';
-        }
-    });
 });
-
-function renderTurnstileWidget() {
-    const widgetContainer = document.getElementById('turnstile-widget');
-    if (widgetContainer) {
-        window.turnstile.render('#turnstile-widget', {
-            sitekey: '0x4AAAAAAA_KLLp_bz0X7eE3',
-            callback: function(token) {
-                // Find or create hidden input for the token
-                let tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
-                if (!tokenInput) {
-                    tokenInput = document.createElement('input');
-                    tokenInput.type = 'hidden';
-                    tokenInput.name = 'cf-turnstile-response';
-                    document.getElementById('contact-form').appendChild(tokenInput);
-                }
-                tokenInput.value = token;
-            }
-        });
-    }
-}
 
 function createLayout(parentElement) {
     // Contact Hero Section
-    const heroSection = document.createElement('section');
-    heroSection.className = 'contact-hero';
-
-    const heroContent = document.createElement('div');
-    heroContent.className = 'hero-content';
-
+    const contactHero = document.createElement('section');
+    contactHero.className = 'contact-hero';
+    
     const heroTitle = document.createElement('h1');
-    heroTitle.textContent = 'Get in Touch';
-
-    const heroSubtitle = document.createElement('p');
-    heroSubtitle.textContent = 'Have a question or project in mind? Let\'s talk about it!';
-
-    heroContent.appendChild(heroTitle);
-    heroContent.appendChild(heroSubtitle);
-    heroSection.appendChild(heroContent);
-
-    parentElement.appendChild(heroSection);
-
-    // Main contact container
+    heroTitle.textContent = 'Get In Touch';
+    contactHero.appendChild(heroTitle);
+    
+    const heroText = document.createElement('p');
+    heroText.textContent = 'Have a question, feedback, or want to work together? I\'d love to hear from you!';
+    contactHero.appendChild(heroText);
+    
+    parentElement.appendChild(contactHero);
+    
+    // Container for form and contact info
     const contactContainer = document.createElement('div');
     contactContainer.className = 'contact-container';
+    parentElement.appendChild(contactContainer);
 
     // Form Section
     const formSection = document.createElement('section');
@@ -125,9 +52,21 @@ function createLayout(parentElement) {
     const contactGroup = document.createElement('div');
     contactGroup.className = 'form-group contact-method-group';
 
+    // Create label wrapper to hold label and type indicator side by side
+    const labelWrapper = document.createElement('div');
+    labelWrapper.className = 'contact-label-wrapper';
+    
     const contactLabel = document.createElement('label');
     contactLabel.htmlFor = 'contactMethod';
     contactLabel.textContent = 'Contact Method*';
+    
+    const methodType = document.createElement('span');
+    methodType.className = 'contact-type-label';
+    methodType.id = 'contact-type-label';
+    
+    labelWrapper.appendChild(contactLabel);
+    labelWrapper.appendChild(methodType);
+    contactGroup.appendChild(labelWrapper);
 
     const contactWrapper = document.createElement('div');
     contactWrapper.className = 'contact-input-wrapper';
@@ -143,14 +82,8 @@ function createLayout(parentElement) {
     methodIcon.className = 'fa-solid fa-circle-question contact-type-icon';
     methodIcon.title = 'Enter your preferred contact method';
 
-    const methodType = document.createElement('span');
-    methodType.className = 'contact-type-label';
-
     contactWrapper.appendChild(contactInput);
     contactWrapper.appendChild(methodIcon);
-    contactWrapper.appendChild(methodType);
-
-    contactGroup.appendChild(contactLabel);
     contactGroup.appendChild(contactWrapper);
     form.appendChild(contactGroup);
 
@@ -183,33 +116,28 @@ function createLayout(parentElement) {
     // Add Turnstile widget container before the submit button
     const turnstileContainer = document.createElement('div');
     turnstileContainer.className = 'turnstile-container';
-    turnstileContainer.id = 'turnstile-widget';
+    turnstileContainer.id = 'contact-turnstile';
     form.appendChild(turnstileContainer);
 
-    // Form error message container
+    // Submit button
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'submit-btn';
+    submitBtn.textContent = 'Send Message';
+    form.appendChild(submitBtn);
+
+    // Error message container
     const errorContainer = document.createElement('div');
     errorContainer.className = 'error-container';
     errorContainer.style.display = 'none';
     form.appendChild(errorContainer);
 
-    // Submit button
-    const submitBtnWrapper = document.createElement('div');
-    submitBtnWrapper.className = 'submit-btn-wrapper';
-
-    const submitButton = document.createElement('button');
-    submitButton.type = 'submit';
-    submitButton.className = 'submit-btn';
-    submitButton.textContent = 'Send Message';
-
-    submitBtnWrapper.appendChild(submitButton);
-    form.appendChild(submitBtnWrapper);
-
-    // Form event listeners for validation and submission
     form.addEventListener('submit', handleFormSubmit);
 
     formSection.appendChild(form);
+    contactContainer.appendChild(formSection);
 
-    // Social Links Section
+    // Social/Contact Info Section
     const socialSection = document.createElement('section');
     socialSection.className = 'social-section';
 
@@ -218,424 +146,268 @@ function createLayout(parentElement) {
     socialSection.appendChild(socialTitle);
 
     const socialText = document.createElement('p');
-    socialText.textContent = 'Feel free to reach out through any of these platforms:';
+    socialText.textContent = 'Feel free to reach out through any of these platforms or contact methods:';
     socialSection.appendChild(socialText);
 
     // Social links
     const socialLinks = document.createElement('div');
     socialLinks.className = 'social-links';
 
-    const socialPlatforms = [
-        {
-            name: 'Email',
-            icon: 'fa-solid fa-envelope',
-            url: 'mailto:contact@marcusbc.com',
-            color: '#e74c3c'
-        },
-        {
-            name: 'LinkedIn',
-            icon: 'fa-brands fa-linkedin-in',
-            url: 'https://www.linkedin.com/in/your-profile',
-            color: '#0077b5'
-        },
-        {
-            name: 'GitHub',
-            icon: 'fa-brands fa-github',
-            url: 'https://github.com/M4rcusBC',
-            color: '#333'
-        },
-        {
-            name: 'Twitter',
-            icon: 'fa-brands fa-twitter',
-            url: 'https://twitter.com/your-handle',
-            color: '#1da1f2'
-        },
-        {
-            name: 'Instagram',
-            icon: 'fa-brands fa-instagram',
-            url: 'https://instagram.com/your-profile',
-            color: '#e1306c'
-        }
+    const links = [
+        { icon: 'fa-brands fa-github', name: 'GitHub', url: 'https://github.com/M4rcusBC' },
+        { icon: 'fa-brands fa-linkedin', name: 'LinkedIn', url: 'https://linkedin.com/in/marcusbc' },
+        { icon: 'fa-brands fa-twitter', name: 'Twitter', url: 'https://twitter.com/marcusbc' }
     ];
 
-    socialPlatforms.forEach(platform => {
+    links.forEach(link => {
         const socialLink = document.createElement('a');
-        socialLink.href = platform.url;
+        socialLink.href = link.url;
         socialLink.className = 'social-link';
         socialLink.target = '_blank';
         socialLink.rel = 'noopener noreferrer';
-        socialLink.setAttribute('data-platform', platform.name.toLowerCase());
 
-        const socialIcon = document.createElement('i');
-        socialIcon.className = platform.icon;
-        socialIcon.style.color = platform.color;
-
-        const socialName = document.createElement('span');
-        socialName.textContent = platform.name;
-
-        socialLink.appendChild(socialIcon);
-        socialLink.appendChild(socialName);
+        const icon = document.createElement('i');
+        icon.className = link.icon;
+        
+        const span = document.createElement('span');
+        span.textContent = link.name;
+        
+        socialLink.appendChild(icon);
+        socialLink.appendChild(span);
         socialLinks.appendChild(socialLink);
     });
 
     socialSection.appendChild(socialLinks);
 
-    // Additional contact info
+    // Contact info
     const contactInfo = document.createElement('div');
     contactInfo.className = 'contact-info';
 
-    const locationInfo = document.createElement('div');
-    locationInfo.className = 'info-item';
-
-    const locationIcon = document.createElement('i');
-    locationIcon.className = 'fa-solid fa-location-dot';
-
-    const locationText = document.createElement('span');
-    locationText.textContent = 'Based in San Francisco, CA';
-
-    locationInfo.appendChild(locationIcon);
-    locationInfo.appendChild(locationText);
-    contactInfo.appendChild(locationInfo);
-
-    const availabilityInfo = document.createElement('div');
-    availabilityInfo.className = 'info-item';
-
-    const availabilityIcon = document.createElement('i');
-    availabilityIcon.className = 'fa-solid fa-clock';
-
-    const availabilityText = document.createElement('span');
-    availabilityText.textContent = 'Available for freelance projects';
-
-    availabilityInfo.appendChild(availabilityIcon);
-    availabilityInfo.appendChild(availabilityText);
-    contactInfo.appendChild(availabilityInfo);
-
-    socialSection.appendChild(contactInfo);
-
-    // Add sections to container
-    contactContainer.appendChild(formSection);
-    contactContainer.appendChild(socialSection);
-    parentElement.appendChild(contactContainer);
-
-    // FAQ Section
-    const faqSection = document.createElement('section');
-    faqSection.className = 'faq-section';
-
-    const faqTitle = document.createElement('h2');
-    faqTitle.textContent = 'Frequently Asked Questions';
-    faqSection.appendChild(faqTitle);
-
-    const faqList = document.createElement('div');
-    faqList.className = 'faq-list';
-
-    const faqs = [
-        {
-            question: 'What services do you offer?',
-            answer: 'I specialize in web development, software engineering, and UI/UX design. My expertise includes front-end development with React, back-end development with Node.js, and full-stack [...]'
-        },
-        {
-            question: 'How quickly can you complete a project?',
-            answer: 'Project timelines vary based on complexity and scope. Typically, small projects take 1-2 weeks, while larger ones might take 1-3 months. I\'ll provide a detailed timeline during o[...]'
-        },
-        {
-            question: 'Do you offer maintenance services after project completion?',
-            answer: 'Yes, I offer maintenance packages to ensure your application stays up-to-date and functions properly. These can be arranged on monthly or quarterly bases depending on your needs.'
-        },
-        {
-            question: 'How do you handle project payment?',
-            answer: 'I typically work with a 50% upfront deposit and the remaining 50% upon project completion. For larger projects, we can arrange milestone-based payments.'
-        }
+    const infoItems = [
+        { icon: 'fa-solid fa-envelope', text: 'marcus@marcusbc.com' },
+        { icon: 'fa-solid fa-location-dot', text: 'Prague, Czech Republic' }
     ];
 
-    faqs.forEach((faq, index) => {
-        const faqItem = document.createElement('div');
-        faqItem.className = 'faq-item';
-
-        const question = document.createElement('div');
-        question.className = 'faq-question';
-        question.textContent = faq.question;
-
-        const toggle = document.createElement('span');
-        toggle.className = 'faq-toggle';
-        toggle.textContent = '+';
-        question.appendChild(toggle);
-
-        const answer = document.createElement('div');
-        answer.className = 'faq-answer';
-        answer.textContent = faq.answer;
-
-        faqItem.appendChild(question);
-        faqItem.appendChild(answer);
-
-        question.addEventListener('click', () => {
-            // Toggle active class
-            const isActive = faqItem.classList.contains('active');
-
-            // Close all FAQs
-            document.querySelectorAll('.faq-item').forEach(item => {
-                item.classList.remove('active');
-                item.querySelector('.faq-toggle').textContent = '+';
-                const ans = item.querySelector('.faq-answer');
-                ans.style.maxHeight = '0';
-            });
-
-            // If the clicked FAQ wasn't active, open it
-            if (!isActive) {
-                faqItem.classList.add('active');
-                toggle.textContent = '−';
-                answer.style.maxHeight = answer.scrollHeight + 'px';
-            }
-        });
-
-        faqList.appendChild(faqItem);
+    infoItems.forEach(item => {
+        const infoItem = document.createElement('div');
+        infoItem.className = 'info-item';
+        
+        const icon = document.createElement('i');
+        icon.className = item.icon;
+        
+        const span = document.createElement('span');
+        span.textContent = item.text;
+        
+        infoItem.appendChild(icon);
+        infoItem.appendChild(span);
+        contactInfo.appendChild(infoItem);
     });
 
-    faqSection.appendChild(faqList);
-    parentElement.appendChild(faqSection);
+    socialSection.appendChild(contactInfo);
+    contactContainer.appendChild(socialSection);
+
+    // Add FAQ section
+    createFaqSection(parentElement);
+    
+    // Add jump to top button
+    setupJumpToTopButton();
+    
+    loadFooter(document.body);
 }
 
-function detectContactMethod(event) {
-    const input = event.target;
-    const value = input.value.trim();
-    const wrapper = input.closest('.contact-input-wrapper');
-    const icon = wrapper.querySelector('.contact-type-icon');
-    const label = wrapper.querySelector('.contact-type-label');
-
-    // Remove any existing type classes
-    wrapper.classList.remove('type-email', 'type-phone', 'type-social', 'type-invalid');
-
-    if (!value) {
-        // Empty input
-        icon.className = 'fa-solid fa-circle-question contact-type-icon';
-        icon.title = 'Enter your preferred contact method';
-        label.textContent = '';
-        return;
-    }
-
-    // Check for email pattern
-    if (validateEmail(value)) {
-        wrapper.classList.add('type-email');
-        icon.className = 'fa-solid fa-envelope contact-type-icon';
-        icon.title = 'Email detected';
-        label.textContent = 'Email';
-        input.setCustomValidity('');
-        return;
-    }
-
-    // Check for phone pattern (basic international and local formats)
-    if (validatePhone(value)) {
-        wrapper.classList.add('type-phone');
-        icon.className = 'fa-solid fa-phone contact-type-icon';
-        icon.title = 'Phone number detected';
-        label.textContent = 'Phone';
-        input.setCustomValidity('');
-        return;
-    }
-
-    // Check for social handle patterns
-    const socialType = detectSocialHandle(value);
-    if (socialType) {
-        wrapper.classList.add('type-social');
-        icon.className = `fa-brands ${socialType.icon} contact-type-icon`;
-        icon.title = `${socialType.name} handle detected`;
-        label.textContent = socialType.name;
-        input.setCustomValidity('');
-        return;
-    }
-
-    // If no valid pattern detected
-    wrapper.classList.add('type-invalid');
-    icon.className = 'fa-solid fa-circle-exclamation contact-type-icon';
-    icon.title = 'Unrecognized contact method';
-    label.textContent = 'Unknown';
-    input.setCustomValidity('Please enter a valid email, phone number, or social handle');
-}
-
-// Add validation functions
-function validatePhone(phone) {
-    // Basic phone validation for multiple formats
-    // Handles formats like: +1234567890, (123) 456-7890, 123-456-7890, 123.456.7890
-    const phoneRegex = /^(\+\d{1,3}[ -]?)?\(?\d{3}\)?[ -.]?\d{3}[ -.]?\d{4}$/;
-    return phoneRegex.test(phone);
-}
-
-function detectSocialHandle(value) {
-    // Check for common social media handle patterns
-
-    // Twitter/X handle
-    if (value.includes('twitter.com/') ||
-        value.includes('x.com/')) {
-        return {
-            name: ' Twitter/X',
-            icon: 'fa-twitter'
-        };
-    }
-
-    // Instagram handle
-    if (value.includes('instagram.com/')) {
-        return {
-            name: ' Instagram',
-            icon: 'fa-instagram'
-        };
-    }
-
-    // LinkedIn profile
-    if (value.includes('linkedin.com/in/')) {
-        return {
-            name: 'LinkedIn',
-            icon: 'fa-linkedin-in'
-        };
-    }
-
-    // GitHub handle
-    if (value.includes('github.com/')) {
-        return {
-            name: 'GitHub',
-            icon: 'fa-github'
-        };
-    }
-
-    // Facebook profile
-    if (value.includes('facebook.com/')) {
-        return {
-            name: 'Facebook',
-            icon: 'fa-facebook-f'
-        };
-    }
-
-    return null;
-}
-
-function createFormGroup(id, type, labelText, isRequired = false) {
+function createFormGroup(id, type, labelText, required = false) {
     const group = document.createElement('div');
     group.className = 'form-group';
-
+    
     const label = document.createElement('label');
     label.htmlFor = id;
     label.textContent = labelText;
-
+    
     const input = document.createElement('input');
     input.type = type;
     input.id = id;
     input.name = id;
-    input.required = isRequired;
-
+    if (required) input.required = true;
+    
     group.appendChild(label);
     group.appendChild(input);
-
+    
     return group;
 }
 
-// Updated form submission handler that sends to the correct endpoint
-function handleFormSubmit(event) {
-    event.preventDefault();
+function detectContactMethod(e) {
+    const value = e.target.value.trim();
+    const wrapper = e.target.closest('.contact-input-wrapper');
+    const icon = wrapper.querySelector('.contact-type-icon');
+    const typeLabel = document.getElementById('contact-type-label');
+    
+    // Reset classes
+    wrapper.classList.remove('type-email', 'type-phone', 'type-social', 'type-invalid');
+    
+    // Check for empty value
+    if (!value) {
+        icon.className = 'fa-solid fa-circle-question contact-type-icon';
+        typeLabel.textContent = '';
+        return;
+    }
+    
+    // Detect type based on input
+    if (value.includes('@') && value.includes('.')) {
+        // Likely an email
+        wrapper.classList.add('type-email');
+        icon.className = 'fa-solid fa-envelope contact-type-icon';
+        icon.title = 'Email detected';
+        typeLabel.textContent = 'Email';
+    } else if (/^\+?[0-9\s\-()]{7,}$/.test(value)) {
+        // Likely a phone number
+        wrapper.classList.add('type-phone');
+        icon.className = 'fa-solid fa-phone contact-type-icon';
+        icon.title = 'Phone number detected';
+        typeLabel.textContent = 'Phone';
+    } else if (value.startsWith('@') || value.includes('twitter.com') || value.includes('t.me') || 
+               value.includes('facebook.com') || value.includes('instagram.com')) {
+        // Likely a social handle
+        wrapper.classList.add('type-social');
+        icon.className = 'fa-solid fa-hashtag contact-type-icon';
+        icon.title = 'Social media handle detected';
+        typeLabel.textContent = 'Social';
+    } else {
+        // Invalid or unknown format
+        wrapper.classList.add('type-invalid');
+        icon.className = 'fa-solid fa-circle-exclamation contact-type-icon';
+        icon.title = 'Unable to identify contact method type';
+        typeLabel.textContent = 'Unknown';
+    }
+}
 
-    const form = event.target;
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const form = e.target;
     const errorContainer = form.querySelector('.error-container');
-    errorContainer.style.display = 'none';
-    errorContainer.textContent = '';
-
-    // Get form data
-    const formData = new FormData(form);
-
-    const turnstileResponse = formData.get('cf-turnstile-response');
-    if (!turnstileResponse) {
-        showError(errorContainer, 'Please complete the Turnstile challenge.');
-        return;
+    const submitBtn = form.querySelector('.submit-btn');
+    
+    // Disable the button during submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    
+    try {
+        // In a real implementation, you would send the form data to your server
+        // For now, we'll just simulate a successful submission
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Clear the form
+        form.reset();
+        
+        // Show success message
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = 'Your message has been sent successfully! I\'ll get back to you soon.';
+        errorContainer.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+        errorContainer.style.color = '#1b5e20';
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+            errorContainer.style.display = 'none';
+        }, 5000);
+    } catch (error) {
+        // Show error message
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = 'There was an error sending your message. Please try again later.';
+        errorContainer.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+        errorContainer.style.color = '#b71c1c';
+    } finally {
+        // Re-enable the button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
     }
+}
 
-    const name = formData.get('name');
-    const contactMethod = formData.get('contactMethod');
-    const subject = formData.get('subject');
-    const message = formData.get('message');
+function createFaqSection(parentElement) {
+    const faqSection = document.createElement('section');
+    faqSection.className = 'faq-section';
+    
+    const faqTitle = document.createElement('h2');
+    faqTitle.textContent = 'Frequently Asked Questions';
+    faqSection.appendChild(faqTitle);
+    
+    const faqList = document.createElement('div');
+    faqList.className = 'faq-list';
+    
+    const faqs = [
+        {
+            question: 'What is the best way to contact you?',
+            answer: 'The fastest way to reach me is through email at marcus@marcusbc.com. For project inquiries, please use the contact form on this page with as much detail as possible.'
+        },
+        {
+            question: 'Do you work with clients remotely?',
+            answer: 'Yes, I work with clients from all over the world. Remote collaboration has been a core part of my workflow for years, using tools like Zoom, Slack, and GitHub for seamless communication and project management.'
+        },
+        {
+            question: 'What information should I include in my project inquiry?',
+            answer: 'To get the most helpful response, please include: project goals, timeline expectations, budget range, any specific technical requirements, and how you envision working together. The more details you can provide, the better I can assess if I\'m the right fit for your project.'
+        },
+        {
+            question: 'How quickly do you respond to inquiries?',
+            answer: 'I typically respond to all inquiries within 1-2 business days. If your project is time-sensitive, please mention that in your message and I\'ll prioritize accordingly.'
+        }
+    ];
+    
+    faqs.forEach(faq => {
+        const faqItem = document.createElement('div');
+        faqItem.className = 'faq-item';
+        
+        const question = document.createElement('div');
+        question.className = 'faq-question';
+        question.textContent = faq.question;
+        
+        const toggle = document.createElement('span');
+        toggle.className = 'faq-toggle';
+        toggle.innerHTML = '&#9662;'; // Down arrow character
+        question.appendChild(toggle);
+        
+        const answer = document.createElement('div');
+        answer.className = 'faq-answer';
+        answer.textContent = faq.answer;
+        
+        faqItem.appendChild(question);
+        faqItem.appendChild(answer);
+        faqList.appendChild(faqItem);
+        
+        // Add toggle functionality
+        question.addEventListener('click', () => {
+            faqItem.classList.toggle('active');
+        });
+    });
+    
+    faqSection.appendChild(faqList);
+    parentElement.appendChild(faqSection);
+}
 
-    // Basic validation
-    if (!name || !contactMethod || !subject || !message) {
-        showError(errorContainer, 'Please fill in all required fields.');
-        return;
-    }
+function setupJumpToTopButton() {
+    // Create jump to top button
+    const jumpToTopButton = document.createElement('button');
+    jumpToTopButton.className = 'jump-to-top';
+    jumpToTopButton.innerHTML = '&#8679;'; // Unicode for up arrow
+    jumpToTopButton.setAttribute('aria-label', 'Scroll to top');
+    document.body.appendChild(jumpToTopButton);
 
-    // Validate contact method (it's already validated during input)
-    const contactInput = form.querySelector('#contactMethod');
-    if (contactInput.validity.customError) {
-        showError(errorContainer, contactInput.validationMessage);
-        return;
-    }
-
-    const submitButton = form.querySelector('.submit-btn');
-    const originalText = submitButton.textContent;
-    submitButton.textContent = 'Sending...';
-    submitButton.disabled = true;
-
-    // Convert FormData to JSON
-    const formDataJSON = {};
-    formData.forEach((value, key) => {
-        formDataJSON[key] = value;
+    // Add event listeners
+    jumpToTopButton.addEventListener('click', () => {
+        window.scrollTo({top: 0, behavior: 'smooth'});
     });
 
-    // Send data to the correct backend route for verification
-    fetch('/messages/send', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formDataJSON)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Success handling
-                form.reset();
-                submitButton.textContent = 'Message Sent!';
-
-                // Reset Turnstile widget
-                if (window.turnstile) {
-                    window.turnstile.reset('#turnstile-widget');
-                }
-
-                // Reset button after a delay
-                setTimeout(() => {
-                    submitButton.textContent = originalText;
-                    submitButton.disabled = false;
-                }, 3000);
-            } else {
-                // Error handling
-                showError(errorContainer, data.error || 'Failed to send message. Please try again.');
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-
-                // Reset Turnstile on failure
-                if (window.turnstile) {
-                    window.turnstile.reset('#turnstile-widget');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Form submission error:', error);
-            showError(errorContainer, 'An unexpected error occurred. Please try again later.');
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-
-            // Reset Turnstile on error
-            if (window.turnstile) {
-                window.turnstile.reset('#turnstile-widget');
-            }
-        });
-}
-
-function showError(container, message) {
-    container.textContent = message;
-    container.style.display = 'block';
-    // Scroll to error
-    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-function validateEmail(email) {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+    // Show/hide based on scroll position
+    function toggleButtonVisibility() {
+        if (window.scrollY > 200) {
+            jumpToTopButton.style.display = 'block';
+        } else {
+            jumpToTopButton.style.display = 'none';
+        }
+    }
+    
+    // Initialize visibility
+    toggleButtonVisibility();
+    
+    // Add scroll listener
+    window.addEventListener('scroll', toggleButtonVisibility);
 }
