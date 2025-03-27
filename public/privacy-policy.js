@@ -53,14 +53,12 @@ function createPrivacyContent(parentElement) {
         <p>Thank you for visiting marcusbc.com. This Privacy Policy explains how I collect, use, disclose, and safeguard your information when you visit my website.</p>
         
         <h2>Information Collection</h2>
-        <p>I may collect information about you in a variety of ways. The information I may collect via the Website includes:</p>
         
         <h3>Personal Data</h3>
         <p>While using my Website, I may ask you to provide me with certain personally identifiable information that can be used to contact or identify you ("Personal Data"). Personally identifiable information may include, but is not limited to:</p>
         <ul>
-            <li>Email address</li>
-            <li>Name</li>
-            <li>Message content when using the contact form</li>
+            <li>A username you sign up with for the purposes of authentication</li>
+            <li>Any message content when using the contact form will be saved in a log pending my review and response</li>
         </ul>
         
         <h3>Usage Data</h3>
@@ -72,45 +70,29 @@ function createPrivacyContent(parentElement) {
         <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of my Website.</p>
         
         <h2>Use of Data</h2>
-        <p>I may use the collected data for various purposes:</p>
+        <p>I may use the collected data for only the following purposes:</p>
         <ul>
-            <li>To provide and maintain the Website</li>
-            <li>To notify you about changes to my Website</li>
-            <li>To allow you to participate in interactive features of my Website when you choose to do so</li>
-            <li>To provide customer care and support</li>
-            <li>To provide analysis or valuable information so that I can improve the Website</li>
+            <li>To provide customer support</li>
+            <li>To provide analysis or other valuable information for the purpose of improving the Website</li>
             <li>To monitor the usage of the Website</li>
-            <li>To detect, prevent and address technical issues</li>
+            <li>To detect, prevent and address technical issues on the site or the infrastructure it is hosted on</li>
         </ul>
         
         <h2>Transfer of Data</h2>
-        <p>Your information, including Personal Data, may be transferred to — and maintained on — computers located outside of your state, province, country or other governmental jurisdiction where the data protection laws may differ from those from your jurisdiction.</p>
+        <p>The information you provide to this site may be stored on and transferred between computers located outside of your state, province, country or other governmental jurisdiction where the data protection laws may differ from those from your jurisdiction.</p>
         
         <h2>Security of Data</h2>
-        <p>The security of your data is important to me, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While I strive to use commercially acceptable means to protect your Personal Data, I cannot guarantee its absolute security.</p>
-        
-        <h2>Service Providers</h2>
-        <p>I may employ third-party companies and individuals to facilitate my Website ("Service Providers"), to provide the Website on my behalf, to perform Website-related services or to assist me in analyzing how my Website is used.</p>
-        <p>These third parties have access to your Personal Data only to perform these tasks on my behalf and are obligated not to disclose or use it for any other purpose.</p>
+        <p>While I strive to use commercially acceptable means to protect your Personal Data, I cannot guarantee its absolute security. This site is proxied behind the Cloudflare network, so your trust is primarily instilled in them.</p>
         
         <h2>Links to Other Sites</h2>
         <p>My Website may contain links to other sites that are not operated by me. If you click on a third-party link, you will be directed to that third party's site. I strongly advise you to review the Privacy Policy of every site you visit.</p>
         <p>I have no control over and assume no responsibility for the content, privacy policies or practices of any third-party sites or services.</p>
         
-        <h2>Children's Privacy</h2>
-        <p>My Website does not address anyone under the age of 18 ("Children"). I do not knowingly collect personally identifiable information from anyone under the age of 18. If you are a parent or guardian and you are aware that your Children has provided me with Personal Data, please contact me. If I become aware that I have collected Personal Data from children without verification of parental consent, I take steps to remove that information from my servers.</p>
-        
         <h2>Changes to This Privacy Policy</h2>
-        <p>I may update my Privacy Policy from time to time. I will notify you of any changes by posting the new Privacy Policy on this page.</p>
-        <p>I will let you know via a prominent notice on my Website, prior to the change becoming effective and update the "last updated" date at the top of this Privacy Policy.</p>
         <p>You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.</p>
         
         <h2>Contact Me</h2>
-        <p>If you have any questions about this Privacy Policy, please contact me:</p>
-        <ul>
-            <li>By email: m4rcusbc@example.com</li>
-            <li>By visiting the contact page on my website</li>
-        </ul>
+        <p>If you have any questions about this Privacy Policy, please contact me by visiting the contact page on my site <a href="./contact.html">here</a>.</p>
     `;
 
     privacySection.appendChild(content);

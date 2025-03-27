@@ -155,8 +155,7 @@ function createLayout(parentElement) {
 
     const links = [
         { icon: 'fa-brands fa-github', name: 'GitHub', url: 'https://github.com/M4rcusBC' },
-        { icon: 'fa-brands fa-linkedin', name: 'LinkedIn', url: 'https://linkedin.com/in/marcusbc' },
-        { icon: 'fa-brands fa-twitter', name: 'Twitter', url: 'https://twitter.com/marcusbc' }
+        { icon: 'fa-brands fa-linkedin', name: 'LinkedIn', url: 'https://linkedin.com/in/marcusbclements' }
     ];
 
     links.forEach(link => {
@@ -184,8 +183,8 @@ function createLayout(parentElement) {
     contactInfo.className = 'contact-info';
 
     const infoItems = [
-        { icon: 'fa-solid fa-envelope', text: 'marcus@marcusbc.com' },
-        { icon: 'fa-solid fa-location-dot', text: 'Prague, Czech Republic' }
+        { icon: 'fa-solid fa-envelope', text: 'admin@marcusbc.com' },
+        { icon: 'fa-solid fa-location-dot', text: 'Minnesota, United States' }
     ];
 
     infoItems.forEach(item => {
