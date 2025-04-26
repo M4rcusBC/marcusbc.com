@@ -11,6 +11,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X } from "lucide-react";
 
+export const PRIVACY_POLICY_VERSION = "1.0.1";
+
 export function PrivacyPolicyModal({
   open,
   onOpenChange,
@@ -24,7 +26,8 @@ export function PrivacyPolicyModal({
         <DialogHeader>
           <DialogTitle>Privacy Policy</DialogTitle>
           <DialogDescription>
-            Last updated: April 26, 2025
+            Last updated: April 26, 2025<br />
+            Version {PRIVACY_POLICY_VERSION}
           </DialogDescription>
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
         </DialogHeader>

@@ -12,9 +12,8 @@ import {
   DialogDescription 
 } from "@/components/ui/dialog"
 import { PrivacyPolicyModal } from "./privacy-policy-modal";
+import { PRIVACY_POLICY_VERSION } from "./privacy-policy-modal"
 
-// Current privacy policy version - increment when you update the policy
-export const PRIVACY_POLICY_VERSION = "1.0.0";
 
 export default function CookieNotice() {
   const [isVisible, setIsVisible] = useState(false)
@@ -113,8 +112,8 @@ export default function CookieNotice() {
               </li>
               <li>
                 <strong>Privacy policy update:</strong> Our privacy policy has been updated since you last accepted<br />
-                <strong>Current version:</strong> {PRIVACY_POLICY_VERSION}<br /><strong>Accepted version:</strong> {localStorage.getItem("policyVersion") || "Not accepted"}
-                
+                <strong>Current version:</strong> {PRIVACY_POLICY_VERSION}<br />
+                <strong>Accepted version:</strong> {localStorage.getItem("policyVersion") || "Not accepted"}
               </li>
               <li>
                 <strong>New device:</strong> You're visiting from a new device or browser
