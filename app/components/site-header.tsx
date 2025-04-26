@@ -16,9 +16,6 @@ export default function SiteHeader() {
         </div>
         <div className="hidden md:flex ml-4">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link href="/#about" className="transition-colors hover:text-foreground/80">
-              About
-            </Link>
             <Link href="/#projects" className="transition-colors hover:text-foreground/80">
               Projects
             </Link>

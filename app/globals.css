@@ -103,3 +103,11 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Add this to your CSS */
+.google-icon {
+  content: url("/assets/google-icon-dark.svg");
+}
+.dark .google-icon {
+  content: url("/assets/google-icon-light.svg");
+}

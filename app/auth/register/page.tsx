@@ -106,12 +106,7 @@ export default function Register() {
             GitHub
           </Button>
           <Button variant="outline" onClick={() => signIn("google")}>
-            <img 
-              src={`/assets/google-icon-${typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'}.svg`} 
-              alt="Google logo" 
-              width="16px" 
-              className="mr-2 h-4" 
-            />
+          <div className="google-icon mr-2 h-4 w-4" />
             Google
           </Button>
         </div>
