@@ -1,7 +1,36 @@
 "use server"
 
-import { executeQuery } from "@/lib/db"
+import { executeQuery } from "@/lib/db";
+import { hash } from "bcrypt";
 import { revalidatePath } from "next/cache"
+
+export async function registerUser(email: string, password: string, name: string) {
+  try {
+    // Check if user already exists
+    const existingUser = await executeQuery(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    
+    if (existingUser.length > 0) {
+      return { success: false, message: "User already exists" };
+    }
+    
+    // Hash password
+    const hashedPassword = await hash(password, 10);
+    
+    // Create user in database
+    await executeQuery(
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
+      [name, email, hashedPassword]
+    );
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error registering user:", error);
+    return { success: false, message: "Failed to register user" };
+  }
+}
 
 export async function submitContactForm(formData: FormData) {
   try {
@@ -45,7 +74,8 @@ export async function getProjects() {
       )
 
       // Extract tags into an array
-      project.tags = tags.map((t: any) => t.tag)
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            project.tags = tags.map((t: any) => t.tag)
     }
 
     return projects

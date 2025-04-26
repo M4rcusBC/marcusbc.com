@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import MobileNav from "./mobile-nav"
+import { SignInButton } from "@/components/auth/signin-button"
 
 export default function SiteHeader() {
   return (
@@ -10,7 +11,7 @@ export default function SiteHeader() {
         <div className="flex items-center">
           <MobileNav />
           <Link className="mr-6 flex items-center space-x-2" href="/">
-            <span className="font-bold sm:inline-block">Marcus Clements</span>
+            <span className="font-bold sm:inline-block">marcusbc.com</span>
           </Link>
         </div>
         <div className="hidden md:flex ml-4">
@@ -34,6 +35,7 @@ export default function SiteHeader() {
         </div>
         <div className="ml-auto flex items-center space-x-2">
           <ThemeToggle />
+          <SignInButton />
           <Button variant="outline" asChild className="hidden sm:flex">
             <Link href="/resume">Resume</Link>
           </Button>

@@ -16,11 +16,12 @@ export default async function Page() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Full Stack Developer
+                  Welcome!
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Building digital experiences with modern technologies. Focused on creating elegant solutions to
-                  complex problems.
+                  I'm an aspiring software engineer with a passion for building innovative solutions.
+                  I enjoy working with modern technologies and am always eager to learn new skills.
+                  This portfolio showcases my projects, skills, and interests in the tech world.
                 </p>
               </div>
               <div className="space-x-4">
