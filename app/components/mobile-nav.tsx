@@ -22,9 +22,6 @@ export default function MobileNav() {
           <SheetTitle>Marcus Clements</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-4 mt-8">
-          <Link href="/#about" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
-            About
-          </Link>
           <Link href="/#projects" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
             Projects
           </Link>

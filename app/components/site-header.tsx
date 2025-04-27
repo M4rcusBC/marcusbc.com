@@ -1,43 +1,75 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import MobileNav from "./mobile-nav"
 import { SignInButton } from "@/components/auth/signin-button"
+import { motion } from "framer-motion"
 
 export default function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <motion.header 
+      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="container flex h-14 items-center">
         <div className="flex items-center">
           <MobileNav />
-          <Link className="mr-6 flex items-center space-x-2" href="/">
-            <span className="font-bold sm:inline-block">marcusbc.com</span>
-          </Link>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+          >
+            <Link className="mr-6 flex items-center space-x-2" href="/">
+              <span className="font-bold sm:inline-block">marcusbc.com</span>
+            </Link>
+          </motion.div>
         </div>
         <div className="hidden md:flex ml-4">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link href="/#projects" className="transition-colors hover:text-foreground/80">
-              Projects
-            </Link>
-            <Link href="/tools" className="transition-colors hover:text-foreground/80">
-              Tools
-            </Link>
-            <Link href="/demos" className="transition-colors hover:text-foreground/80">
-              Demos
-            </Link>
-            <Link href="/contact" className="transition-colors hover:text-foreground/80">
-              Contact
-            </Link>
+            {[
+              { href: "/#projects", label: "Projects" },
+              { href: "/tools", label: "Tools" },
+              { href: "/demos", label: "Demos" },
+              { href: "/contact", label: "Contact" }
+            ].map((item, index) => (
+              <motion.div
+                key={item.href}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
+              >
+                <Link href={item.href} className="transition-colors hover:text-foreground/80 hover:underline focus-visible:text-foreground/80 focus-visible:underline">
+                  {item.label}
+                </Link>
+              </motion.div>
+            ))}
           </nav>
         </div>
-        <div className="ml-auto flex items-center space-x-2">
-          <ThemeToggle />
-          <SignInButton />
-          <Button variant="outline" asChild className="hidden sm:flex">
-            <Link href="/resume">Resume</Link>
-          </Button>
-        </div>
+        <motion.div 
+          className="ml-auto flex items-center space-x-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <ThemeToggle />
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.0 }} whileTap={{ scale: 0.95 }}>
+            <SignInButton />
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="outline" asChild className="hidden sm:flex">
+              <Link href="/resume">Resume</Link>
+            </Button>
+          </motion.div>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   )
 }

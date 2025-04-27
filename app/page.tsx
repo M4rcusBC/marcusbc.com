@@ -37,13 +37,7 @@ export default async function Page() {
                     <span className="sr-only">LinkedIn</span>
                   </Button>
                 </Link>
-                <Link href="https://twitter.com" target="_blank">
-                  <Button variant="outline" size="icon">
-                    <Twitter className="h-4 w-4" />
-                    <span className="sr-only">Twitter</span>
-                  </Button>
-                </Link>
-                <Link href="mailto:marcus@example.com">
+                <Link href="mailto:admin@marcusbc.com">
                   <Button variant="outline" size="icon">
                     <Mail className="h-4 w-4" />
                     <span className="sr-only">Email</span>
