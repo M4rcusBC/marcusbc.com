@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import MobileNav from "./mobile-nav"
-import { SignInButton } from "@/components/auth/signin-button"
 import { motion } from "framer-motion"
+import ProfileButton from "@/components/auth/profile-button"
 
 export default function SiteHeader() {
   return (
@@ -58,15 +58,12 @@ export default function SiteHeader() {
           transition={{ delay: 0.6, duration: 0.4 }}
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <ThemeToggle />
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.0 }} whileTap={{ scale: 0.95 }}>
-            <SignInButton />
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button variant="outline" asChild className="hidden sm:flex">
               <Link href="/resume">Resume</Link>
             </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.0 }} whileTap={{ scale: 0.95 }}>
+            <ProfileButton />
           </motion.div>
         </motion.div>
       </div>

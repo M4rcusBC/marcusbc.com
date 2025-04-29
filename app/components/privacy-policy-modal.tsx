@@ -81,7 +81,7 @@ export function PrivacyPolicyModal({
             <p>
               Our website uses Cloudflare for security and performance optimization. To accomplish this, traffic to and from the site is first proxied through Cloudflare.
               As such, your usage of this site is governed by Cloudflare's privacy policy in addition to our own. By using our site, you agree to the collection and use of information in accordance with these policies.
-              <br />Cloudflare's privacy policy can be viewed <a href="https://www.cloudflare.com/privacypolicy/" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">here <img src="/assets/external-link.svg" className="inline h-4 w-4 ml-1" alt="external link icon" /></a>.
+              <br /><br />Cloudflare's privacy policy can be viewed <a href="https://www.cloudflare.com/privacypolicy/" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">here<img src="/assets/external-link.svg" className="inline h-4 w-4" alt="external link icon" /></a>.
             </p>
 
             <h3 className="text-lg font-medium mt-6">Data Security</h3>

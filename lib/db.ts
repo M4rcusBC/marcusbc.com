@@ -10,11 +10,15 @@ import { Pool } from 'pg';
 // - DATABASE_URL: A connection string that can be used instead of individual variables
 
 // Create a pool with SSL enabled (required for most cloud PostgreSQL providers)
-const pool = new Pool({
+export const pool = new Pool({
   // The pool will use environment variables automatically
   // You can also explicitly configure it here if needed
   // connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    user: 'marcusbccom_owner',
+    password: 'npg_EoHe7rZuKb5P', // Plain password, no quotes or encoding
+    host: 'ep-purple-dawn-a8jpk257-pooler.eastus2.azure.neon.tech',
+    database: 'marcusbccom',
+    ssl: true
 });
 
 // Helper function to execute queries

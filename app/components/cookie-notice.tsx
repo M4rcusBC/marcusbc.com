@@ -111,9 +111,11 @@ export default function CookieNotice() {
                 <strong>Cleared browser data:</strong> You've cleared your cookies or browsing data since your last visit
               </li>
               <li>
-                <strong>Privacy policy update:</strong> Our privacy policy has been updated since you last accepted<br />
-                <strong>Current version:</strong> {PRIVACY_POLICY_VERSION}<br />
-                <strong>Accepted version:</strong> {localStorage.getItem("policyVersion") || "Not accepted"}
+                <strong>Privacy policy update:</strong> Our privacy policy has been updated since you last accepted it <u>in this browser</u><br />
+                <ul className="list-disc pl-6 space-y-1">
+                  <li><strong>Current version:</strong> {PRIVACY_POLICY_VERSION}<br /></li>
+                  <li><strong>Accepted version:</strong> {localStorage.getItem("policyVersion") || "Not accepted"}</li>
+                </ul>
               </li>
               <li>
                 <strong>New device:</strong> You're visiting from a new device or browser

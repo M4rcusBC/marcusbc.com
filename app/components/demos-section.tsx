@@ -15,7 +15,12 @@ export default async function DemosSection() {
               <h3 className="text-xl font-semibold">{demo.title}</h3>
               <p className="text-muted-foreground">{demo.description}</p>
             </div>
-            <CodeSimulator code={demo.code} language={demo.language} title={demo.title} />
+            <CodeSimulator 
+              code={demo.code} 
+              language={demo.language} 
+              title={demo.title} 
+              initialVariables={demo.initial_variables || []}
+            />
           </div>
         ))
       )}

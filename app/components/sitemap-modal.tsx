@@ -28,10 +28,7 @@ export function SitemapModal({
           <DialogDescription>
             All pages and sections available on marcusbc.com
           </DialogDescription>
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" />
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-6">
@@ -108,7 +105,7 @@ export function SitemapModal({
               <ul className="mt-2 space-y-2">
                 <li>
                   <Link 
-                    href="/auth/signin" 
+                    href="/signin" 
                     className="text-blue-600 dark:text-blue-400 hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
@@ -117,11 +114,11 @@ export function SitemapModal({
                 </li>
                 <li>
                   <Link 
-                    href="/auth/register" 
+                    href="/signup" 
                     className="text-blue-600 dark:text-blue-400 hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
-                    Register
+                    Sign Up
                   </Link>
                 </li>
               </ul>

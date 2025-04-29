@@ -81,21 +81,18 @@ export async function GET() {
           description: "A simple function to generate the Fibonacci sequence",
           code: `function fibonacci(n) {
   const sequence = [0, 1];
-  
   if (n <= 1) return sequence.slice(0, n + 1);
-  
   for (let i = 2; i <= n; i++) {
-    sequence.push(sequence[i-1] + sequence[i-2]);
+    sequence.push(sequence[i - 1] + sequence[i - 2]);
   }
-  
   return sequence;
 }
+// Generate first n Fibonacci numbers
 
-// Generate first 10 Fibonacci numbers
-const result = fibonacci(10);
+const n = number;
+
+const result = fibonacci(n);
 console.log("Fibonacci Sequence:", result);
-
-// Calculate sum of the sequence
 const sum = result.reduce((a, b) => a + b, 0);
 console.log("Sum of sequence:", sum);`,
           language: "javascript",
@@ -104,38 +101,32 @@ console.log("Sum of sequence:", sum);`,
           title: "Sorting Algorithms",
           description: "Implementation of common sorting algorithms",
           code: `function bubbleSort(arr) {
-  const array = [...arr];
-  const n = array.length;
-  
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n - i - 1; j++) {
-      if (array[j] > array[j + 1]) {
-        // Swap elements
-        [array[j], array[j + 1]] = [array[j + 1], array[j]];
-      }
-    }
-  }
-  
-  return array;
-}
+    const array = [...arr]; 
+    const n = array.length; 
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+            if (array[j] > array[j + 1]) {
+                // Swap elements        
+                [array[j], array[j + 1]] = [array[j + 1], array[j]];
+            }
+        }
+    } r
+    return array;
+} 
+    
+function quickSort(arr) { 
+    if (arr.length <= 1) { 
+        return arr; } 
+        const pivot = arr[Math.floor(arr.length / 2)]; 
+        const left = arr.filter(x => x < pivot); const middle = arr.filter(x => x === pivot); 
+        const right = arr.filter(x => x > pivot); 
+        return [...quickSort(left), ...middle, ...quickSort(right)]; }
 
-function quickSort(arr) {
-  if (arr.length <= 1) {
-    return arr;
-  }
-  
-  const pivot = arr[Math.floor(arr.length / 2)];
-  const left = arr.filter(x => x < pivot);
-  const middle = arr.filter(x => x === pivot);
-  const right = arr.filter(x => x > pivot);
-  
-  return [...quickSort(left), ...middle, ...quickSort(right)];
-}
 
-// Test with random array
-const testArray = [34, 7, 23, 32, 5, 62, 1, 45, 13];
-console.log("Original array:", testArray);
-console.log("Bubble sort:", bubbleSort(testArray));
+
+const testArray = inputArray.split(',').map(Number);
+console.log("Original array:", testArray); 
+console.log("Bubble sort:", bubbleSort(testArray)); 
 console.log("Quick sort:", quickSort(testArray));`,
           language: "javascript",
         },

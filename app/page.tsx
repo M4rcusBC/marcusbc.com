@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Github, Linkedin, Mail, Twitter } from "lucide-react"
+import { CodeXmlIcon, Github, Linkedin, Mail, Twitter } from "lucide-react"
 import Link from "next/link"
 import ProjectCard from "./components/project-card"
 import TechStack from "./components/tech-stack"
@@ -19,19 +19,25 @@ export default async function Page() {
                   Welcome!
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  I'm an aspiring software engineer with a passion for building innovative solutions.
+                  I'm a software engineering student with a passion for building challenging and useful software.
                   I enjoy working with modern technologies and am always eager to learn new skills.
                   This portfolio showcases my projects, skills, and interests in the tech world.
                 </p>
               </div>
               <div className="space-x-4">
-                <Link href="https://github.com" target="_blank">
+                <Link href="https://github.com/m4rcusbc/marcusbc.com" target="_blank">
+                  <Button variant="outline">
+                    View Site Source
+                    <CodeXmlIcon className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="https://github.com/m4rcusbc" target="_blank">
                   <Button variant="outline" size="icon">
                     <Github className="h-4 w-4" />
                     <span className="sr-only">GitHub</span>
                   </Button>
                 </Link>
-                <Link href="https://linkedin.com" target="_blank">
+                <Link href="https://linkedin.com/in/marcusbclements" target="_blank">
                   <Button variant="outline" size="icon">
                     <Linkedin className="h-4 w-4" />
                     <span className="sr-only">LinkedIn</span>
@@ -63,8 +69,7 @@ export default async function Page() {
                     tags={project.tags || []}
                   />
                 ))
-              ) : (
-                // Fallback to static projects if no database projects are available
+              ) : ( // Sample projects - not meant to be displayed in production
                 <>
                   <ProjectCard
                     title="E-commerce Platform"
