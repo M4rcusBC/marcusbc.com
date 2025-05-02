@@ -1,4 +1,5 @@
-'use client';
+"use client";
+
 import { UserButton } from '@stackframe/stack';
 import { useTheme } from 'next-themes';
 
