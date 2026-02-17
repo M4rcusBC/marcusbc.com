@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
-import { CodeXmlIcon, Github, Linkedin, Mail, Twitter } from "lucide-react"
+import { CodeXmlIcon, Github, Linkedin, Mail } from "lucide-react"
 import Link from "next/link"
 import ProjectCard from "./components/project-card"
 import TechStack from "./components/tech-stack"
+import GitHubActivity from "./components/github-activity"
 import { getProjects } from "./actions"
 
 export default async function Page() {
@@ -11,6 +12,7 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-background">
       <main className="container px-4 md:px-6">
+        {/* About Section */}
         <section id="about" className="py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -54,6 +56,7 @@ export default async function Page() {
           </div>
         </section>
 
+        {/* Projects Section */}
         <section id="projects" className="py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-12 text-center">Projects</h2>
@@ -69,7 +72,7 @@ export default async function Page() {
                     tags={project.tags || []}
                   />
                 ))
-              ) : ( // Sample projects - not meant to be displayed in production
+              ) : (
                 <>
                   <ProjectCard
                     title="E-commerce Platform"
@@ -98,7 +101,7 @@ export default async function Page() {
 
             <div className="mt-12 text-center">
               <Button asChild>
-                <Link href="https://github.com" target="_blank">
+                <Link href="https://github.com/m4rcusbc" target="_blank">
                   <Github className="mr-2 h-4 w-4" />
                   View All Projects on GitHub
                 </Link>
@@ -107,31 +110,36 @@ export default async function Page() {
           </div>
         </section>
 
-        <section className="py-12 md:py-24 lg:py-32">
+        {/* What I've Been Working On Section */}
+        <section id="recent-work" className="py-12 md:py-24 lg:py-32 bg-muted/50">
           <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-12 text-center">
-              Tech Stack
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4 text-center">
+              What I've Been Working On
             </h2>
-            <TechStack />
+            <p className="text-center text-muted-foreground mb-12 max-w-[700px] mx-auto">
+              Recent repositories I've contributed to on GitHub
+            </p>
+            <GitHubActivity />
           </div>
         </section>
 
+        {/* Quick Links Section */}
         <section className="py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 md:grid-cols-3">
+              <div className="flex flex-col items-center text-center p-6 border rounded-lg">
+                <h3 className="text-xl font-semibold mb-4">Live Code Demos</h3>
+                <p className="text-muted-foreground mb-6">Interactive code examples you can run in your browser.</p>
+                <Button asChild>
+                  <Link href="/demos">View Demos</Link>
+                </Button>
+              </div>
+
               <div className="flex flex-col items-center text-center p-6 border rounded-lg">
                 <h3 className="text-xl font-semibold mb-4">Self-Hosted Tools</h3>
                 <p className="text-muted-foreground mb-6">Explore my collection of self-hosted tools and services.</p>
                 <Button asChild>
                   <Link href="/tools">View Tools</Link>
-                </Button>
-              </div>
-
-              <div className="flex flex-col items-center text-center p-6 border rounded-lg">
-                <h3 className="text-xl font-semibold mb-4">Code Demos</h3>
-                <p className="text-muted-foreground mb-6">Interactive code examples you can run in your browser.</p>
-                <Button asChild>
-                  <Link href="/demos">View Demos</Link>
                 </Button>
               </div>
 
@@ -143,6 +151,16 @@ export default async function Page() {
                 </Button>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Tech Stack Section */}
+        <section className="py-12 md:py-24 lg:py-32 bg-muted/50">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-12 text-center">
+              Tech Stack
+            </h2>
+            <TechStack />
           </div>
         </section>
       </main>

@@ -1,11 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import MobileNav from "./mobile-nav"
 import { motion } from "framer-motion"
-import ProfileButton from "@/components/auth/profile-button"
 
 export default function SiteHeader() {
   return (
@@ -32,8 +30,8 @@ export default function SiteHeader() {
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {[
               { href: "/#projects", label: "Projects" },
-              { href: "/tools", label: "Tools" },
               { href: "/demos", label: "Demos" },
+              { href: "/tools", label: "Tools" },
               { href: "/contact", label: "Contact" }
             ].map((item, index) => (
               <motion.div
@@ -61,9 +59,6 @@ export default function SiteHeader() {
             <Button variant="outline" asChild className="hidden sm:flex">
               <Link href="/resume">Resume</Link>
             </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.0 }} whileTap={{ scale: 0.95 }}>
-            <ProfileButton />
           </motion.div>
         </motion.div>
       </div>
