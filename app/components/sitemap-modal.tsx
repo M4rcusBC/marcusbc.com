@@ -38,7 +38,7 @@ export function SitemapModal({
                 <li>
                   <Link 
                     href="/" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     Home
@@ -47,7 +47,7 @@ export function SitemapModal({
                 <li>
                   <Link 
                     href="/#about" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     About
@@ -56,7 +56,7 @@ export function SitemapModal({
                 <li>
                   <Link 
                     href="/#projects" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     Projects
@@ -64,17 +64,17 @@ export function SitemapModal({
                 </li>
                 <li>
                   <Link 
-                    href="/tools" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    href="/blog" 
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
-                    Tools
+                    Blog
                   </Link>
                 </li>
                 <li>
                   <Link 
                     href="/demos" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     Demos
@@ -83,7 +83,7 @@ export function SitemapModal({
                 <li>
                   <Link 
                     href="/contact" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     Contact
@@ -92,33 +92,10 @@ export function SitemapModal({
                 <li>
                   <Link 
                     href="/resume" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-primary hover:underline"
                     onClick={() => onOpenChange(false)}
                   >
                     Resume
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">Authentication</h3>
-              <ul className="mt-2 space-y-2">
-                <li>
-                  <Link 
-                    href="/signin" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    Sign In
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/signup" 
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    Sign Up
                   </Link>
                 </li>
               </ul>

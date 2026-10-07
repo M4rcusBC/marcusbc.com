@@ -1,6 +1,4 @@
 import { ThemeProvider } from "@/components/theme-provider"
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackServerApp } from "../stack";
 import { cn } from "@/lib/utils"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -13,8 +11,8 @@ import CookieNotice from "./components/cookie-notice"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "marcusbc.com",
-  description: "Full stack developer portfolio showcasing projects, tools, and interactive code demos"
+  title: "Marcus Clements | Software Engineer",
+  description: "Full stack developer portfolio showcasing projects, blog posts, and interactive code demos"
 }
 
 export default function RootLayout({
@@ -25,8 +23,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
-        <StackProvider app={stackServerApp}>
-          <StackTheme>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="relative flex min-h-screen flex-col container-center">
             <SiteHeader />
@@ -36,7 +32,7 @@ export default function RootLayout({
           </div>
           <CookieNotice />
         </ThemeProvider>
-      </StackTheme></StackProvider></body>
+      </body>
     </html>
   )
 }

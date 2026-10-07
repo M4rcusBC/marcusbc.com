@@ -203,7 +203,7 @@ ${code}
         <TabsContent value="variables" className="p-0 m-0">
           <div className="p-4 overflow-auto bg-muted/50 max-h-80">
             {variables.length === 0 ? (
-              <p className="text-sm text-gray-500">No editable variables defined.</p>
+              <p className="text-sm text-muted-foreground">No editable variables defined.</p>
             ) : (
               <div className="space-y-4">
                 {variables.map((variable, index) => (

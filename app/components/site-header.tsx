@@ -5,7 +5,6 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import MobileNav from "./mobile-nav"
 import { motion } from "framer-motion"
-import ProfileButton from "@/components/auth/profile-button"
 
 export default function SiteHeader() {
   return (
@@ -32,7 +31,7 @@ export default function SiteHeader() {
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {[
               { href: "/#projects", label: "Projects" },
-              { href: "/tools", label: "Tools" },
+              { href: "/blog", label: "Blog" },
               { href: "/demos", label: "Demos" },
               { href: "/contact", label: "Contact" }
             ].map((item, index) => (
@@ -62,9 +61,7 @@ export default function SiteHeader() {
               <Link href="/resume">Resume</Link>
             </Button>
           </motion.div>
-          <motion.div whileHover={{ scale: 1.0 }} whileTap={{ scale: 0.95 }}>
-            <ProfileButton />
-          </motion.div>
+          <ThemeToggle />
         </motion.div>
       </div>
     </motion.header>

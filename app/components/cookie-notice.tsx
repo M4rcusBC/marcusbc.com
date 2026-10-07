@@ -53,7 +53,7 @@ export default function CookieNotice() {
                   type="button"
                   className="text-primary underline" 
                   onClick={() => setPrivacyPolicyOpen(true)}
-                >our</button> and <a 
+                >my</button> and <a 
                   href="https://cloudflare.com/privacypolicy/"
                   className="text-primary underline"
                   target="_blank"
@@ -105,13 +105,13 @@ export default function CookieNotice() {
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <strong>First visit:</strong> This is your first time visiting our website
+                <strong>First visit:</strong> This is your first time visiting my website
               </li>
               <li>
                 <strong>Cleared browser data:</strong> You've cleared your cookies or browsing data since your last visit
               </li>
               <li>
-                <strong>Privacy policy update:</strong> Our privacy policy has been updated since you last accepted it <u>in this browser</u><br />
+                <strong>Privacy policy update:</strong> My privacy policy has been updated since you last accepted it <u>in this browser</u><br />
                 <ul className="list-disc pl-6 space-y-1">
                   <li><strong>Current version:</strong> {PRIVACY_POLICY_VERSION}<br /></li>
                   <li><strong>Accepted version:</strong> {localStorage.getItem("policyVersion") || "Not accepted"}</li>
@@ -122,10 +122,10 @@ export default function CookieNotice() {
               </li>
             </ul>
             <p>
-              We require your consent to use cookies and other technologies as outlined in our privacy policy. These help us provide a better experience and understand how users interact with our site.
+              I require your consent to use strictly necessary cookies and other technologies as outlined in my privacy policy. These help me provide a better experience and ensure the basic functioning of my site.
             </p>
             <p>
-              When our privacy policy is updated, we ask for your consent again to ensure you're aware of any changes to how we collect, process, or use any data you provide to the site.
+              When my privacy policy is updated, I ask for your consent again to ensure you're aware of any changes.
             </p>
           </div>
         </DialogContent>

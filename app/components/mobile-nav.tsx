@@ -25,8 +25,8 @@ export default function MobileNav() {
           <Link href="/#projects" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
             Projects
           </Link>
-          <Link href="/tools" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
-            Tools
+          <Link href="/blog" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
+            Blog
           </Link>
           <Link href="/demos" className="text-lg font-medium hover:underline" onClick={() => setOpen(false)}>
             Demos

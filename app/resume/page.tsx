@@ -2,27 +2,26 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   ArrowLeft,
-  Download,
   Mail,
-  Phone,
   MapPin,
   Linkedin,
 } from "lucide-react";
 import Link from "next/link";
-import DownloadButton from "@/components/download-button";
 
 export default function ResumePage() {
 
   return (
     <div className="container py-12 container-center">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <Link href="/">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Portfolio
           </Button>
         </Link>
-        <DownloadButton filename="resume.pdf" />
+        <p className="text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md border">
+          <span className="font-medium">Note:</span> This resume is live. Please reference this URL for the most up-to-date version.
+        </p>
       </div>
 
       <Card className="p-8 resume-content">
@@ -36,17 +35,14 @@ export default function ResumePage() {
             <div className="flex flex-wrap gap-4 mt-3 text-sm">
               <div className="flex items-center">
                 <Mail className="mr-1 h-4 w-4" />
-                <a href="admin@marcusbc.com" className="hover:underline">
+                <a href="mailto:marcus.bc@icloud.com" className="hover:underline">
                   marcus.bc@icloud.com
                 </a>
               </div>
-              <div className="flex items-center">
-                <Phone className="mr-1 h-4 w-4" />
-                <span>(763)-357-8293</span>
-              </div>
+
               <div className="flex items-center">
                 <MapPin className="mr-1 h-4 w-4" />
-                <span>Saint Paul, MN</span>
+                <span>Saint Paul, MN / La Crosse, WI</span>
               </div>
               <div className="flex items-center">
                 <Linkedin className="mr-1 h-4 w-4" />
@@ -233,11 +229,68 @@ export default function ResumePage() {
               ].map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-sm font-medium text-primary ring-1 ring-inset ring-primary/20"
+                  className="inline-flex items-center rounded-full bg-secondary/80 text-secondary-foreground px-3 py-1 text-xs font-medium ring-1 ring-inset ring-border/60 hover:bg-secondary transition-colors"
                 >
                   {skill}
                 </span>
               ))}
+            </div>
+          </div>
+
+          {/* Projects */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <h2 className="text-xl font-semibold">Selected Projects</h2>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-1 md:gap-0">
+                  <h3 className="font-medium flex items-center gap-2 flex-wrap">
+                    RateMyLandlords
+                    <span className="text-xs font-normal px-2 py-0.5 bg-secondary rounded-full">Full-Stack App</span>
+                  </h3>
+                  <Link href="https://github.com/m4rcusbc/ratemylandlords" target="_blank" className="text-sm text-primary hover:underline">
+                    github.com/m4rcusbc/ratemylandlords
+                  </Link>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  A platform for tenants to review landlords featuring a core algorithm that calculates trust scores based on weighted reviews and tenant verification.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-1 md:gap-0">
+                  <h3 className="font-medium flex items-center gap-2 flex-wrap">
+                    marcusbc.com
+                    <span className="text-xs font-normal px-2 py-0.5 bg-secondary rounded-full">Next.js / Tailwind</span>
+                  </h3>
+                  <Link href="https://github.com/m4rcusbc/marcusbc.com" target="_blank" className="text-sm text-primary hover:underline">
+                    github.com/m4rcusbc/marcusbc.com
+                  </Link>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  A serverless personal portfolio and blog with dynamic GitHub API project fetching, an interactive markdown blog, and a custom code simulator.
+                </p>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-1 md:gap-0">
+                  <h3 className="font-medium flex items-center gap-2 flex-wrap">
+                    CS440 Projects
+                    <span className="text-xs font-normal px-2 py-0.5 bg-secondary rounded-full">C/C++ / Java</span>
+                  </h3>
+                  <Link href="https://github.com/m4rcusbc/CS440_Project" target="_blank" className="text-sm text-primary hover:underline">
+                    github.com/m4rcusbc/CS440_Project
+                  </Link>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  A collection of academic engineering projects including a custom UNIX-like shell parsing and process execution implementation.
+                </p>
+              </div>
+            </div>
+            
+            <div className="pt-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/#projects">View more projects on portfolio</Link>
+              </Button>
             </div>
           </div>
         </div>
