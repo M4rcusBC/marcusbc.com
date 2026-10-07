@@ -1,6 +1,6 @@
 # marcusbc.com
 
-Welcome to the source code for my personal portfolio and website. This project serves as a central hub for my software engineering projects, code demos, and personal blog.
+Welcome to the source code for my personal website. This project serves as a central hub for my software engineering projects, code demos, and personal blog! If you'd like to collaborate on the site, pull requests are always welcome.
 
 ## Features
 
