@@ -29,7 +29,6 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^22",
     "@types/pg": "^8.11.14",
     "@types/react": "^18",
