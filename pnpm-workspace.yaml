@@ -8,3 +8,16 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - workerd
+overrides:
+  '@fastify/busboy@<3.2.2': ^3.2.2
+  '@tootallnate/once@<2.0.1': ^2.0.1
+  ajv@>=7.0.0-alpha.0 <8.18.0: ^8.18.0
+  cookie@<0.7.0: ^0.7.0
+  esbuild@<=0.24.2: ^0.25.0
+  path-to-regexp@>=4.0.0 <6.3.0: ^6.3.0
+  postcss-selector-parser@<7.1.6: ^7.1.6
+  sharp@<0.35.5: ^0.35.5
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
+  tar@<=7.5.20: ^7.5.21
+  undici@<6.28.1: ^6.28.1
+  ws@>=8.0.0 <8.21.0: ^8.21.0
