@@ -11,7 +11,7 @@ import CookieNotice from "./components/cookie-notice"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Marcus Clements | Software Engineer",
+  title: "Marcus Clements",
   description: "Full stack developer portfolio showcasing projects, blog posts, and interactive code demos"
 }
 
