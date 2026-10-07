@@ -19,7 +19,7 @@
     "framer-motion": "latest",
     "gray-matter": "^4.0.3",
     "lucide-react": "0.454.0",
-    "next": "15.5.24",
+    "next": "15.0.3",
     "next-themes": "latest",
     "react": "^18",
     "react-dom": "^18",
@@ -29,6 +29,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "wrangler": "latest",
     "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^22",
     "@types/pg": "^8.11.14",

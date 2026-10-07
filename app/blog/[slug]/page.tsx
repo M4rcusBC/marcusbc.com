@@ -5,10 +5,15 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
-  const posts = getAllPosts()
-  return posts.map((post) => ({
-    slug: post.id,
-  }))
+  try {
+    const posts = getAllPosts()
+    return posts.map((post) => ({
+      slug: post.id,
+    }))
+  } catch (e) {
+    console.error("Error in generateStaticParams:", e)
+    return []
+  }
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
@@ -53,4 +58,3 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     notFound()
   }
 }
-
