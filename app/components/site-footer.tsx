@@ -40,7 +40,7 @@ export default function SiteFooter() {
           </Link>
         </nav>
         <Button disabled variant="outline" className="text-xs text-muted-foreground border-border/60">
-          <p className="text-xs">v0.0.2 | Built with<HeartIcon className="h-4 w-4 inline mx-1 mb-1 text-rose-400" /></p>
+          <p className="text-xs">v1.0.0 | Built with<HeartIcon className="h-4 w-4 inline mx-1 mb-1 text-rose-400" /></p>
         </Button>
       </div>
 
