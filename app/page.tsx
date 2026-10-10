@@ -59,6 +59,7 @@ export default async function Page() {
                     title={project.title}
                     description={project.description}
                     link={project.github_url}
+                    liveUrl={project.live_url}
                     tags={project.tags || []}
                   />
                 ))

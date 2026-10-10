@@ -11,17 +11,26 @@ export async function getProjects() {
     
     // Format into the expected project structure
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return repos
+    let formattedRepos = repos
       .filter((repo: any) => !repo.fork && repo.name !== "marcusbc.com")
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       .map((repo: any) => ({
         id: repo.id,
         title: repo.name,
-        description: repo.description || "A project by Marcus Clements.",
+        description: repo.name === "ratemylandlords" ? "A platform to rate and review landlords, calculate trust scores, and verify tenants." : (repo.description || "A project by Marcus Clements."),
         github_url: repo.html_url,
-        live_url: repo.homepage || "",
+        live_url: repo.name === "ratemylandlords" ? "https://ratemylandlords.app" : (repo.homepage || ""),
         tags: [repo.language].filter(Boolean)
       }));
+
+    // Ensure ratemylandlords is featured first
+    const rateMyLandlordsIdx = formattedRepos.findIndex((r: any) => r.title === "ratemylandlords");
+    if (rateMyLandlordsIdx > 0) {
+      const [rml] = formattedRepos.splice(rateMyLandlordsIdx, 1);
+      formattedRepos.unshift(rml);
+    }
+    
+    return formattedRepos;
   } catch (error) {
     console.error("Error fetching projects:", error)
     return []
